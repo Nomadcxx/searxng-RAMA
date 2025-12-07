@@ -77,7 +77,8 @@ func main() {
                 logf("Patched default theme to '%s' in %s", flagTheme, sp)
             }
 
-            fmt.Println("Installed RAMA assets successfully.")
+            printHeader()
+    fmt.Println("Installed RAMA assets successfully.")
             fmt.Printf("Theme: %s\n", dstTheme)
             fmt.Printf("Logo : %s\n", dstLogo)
             return nil
@@ -290,4 +291,13 @@ func logf(format string, args ...interface{}) {
 func exitErr(msg string, args ...interface{}) {
     fmt.Fprintf(os.Stderr, msg+"\n", args...)
     os.Exit(1)
+}
+
+func printHeader() {
+    path := mustAbs("assets/RAMA.txt")
+    data, err := os.ReadFile(path)
+    if err != nil {
+        return
+    }
+    fmt.Println(string(data))
 }
