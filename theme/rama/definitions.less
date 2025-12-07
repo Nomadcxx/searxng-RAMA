@@ -1,0 +1,76 @@
+@import "../../searxng_theme_base.less";
+
+/* RAMA Palette */
+@rama-bg: #2b2d42;        // space cadet
+@rama-text: #edf2f4;      // anti-flash white
+@rama-accent: #ef233c;    // pantone red
+@rama-accent-2: #d90429;  // fire engine red
+@rama-gray: #8d99ae;      // cool gray
+
+// Core variables
+@body-background: @rama-bg;
+@header-background: @rama-bg;
+@footer-background: darken(@rama-bg, 4%);
+@text-color: @rama-text;
+@link-color: @rama-accent;
+@link-color-hover: lighten(@rama-accent, 5%);
+@link-color-visited: lighten(@rama-accent, 2%);
+
+// Buttons
+@button-primary-bg: @rama-accent;
+@button-primary-bg-hover: lighten(@rama-accent, 6%);
+@button-primary-text: @rama-text;
+@button-secondary-bg: lighten(@rama-bg, 8%);
+@button-secondary-bg-hover: lighten(@rama-bg, 12%);
+@button-secondary-text: @rama-text;
+
+// Inputs
+@input-bg: lighten(@rama-bg, 6%);
+@input-bg-focus: lighten(@rama-bg, 10%);
+@input-text: @rama-text;
+@input-placeholder: fade(@rama-text, 50%);
+@input-border: @rama-gray;
+
+// Cards / panels
+@panel-bg: lighten(@rama-bg, 4%);
+@panel-border: fade(@rama-gray, 40%);
+@panel-shadow: 0 8px 24px fade(@rama-bg, 60%);
+
+// Tags / badges
+@tag-bg: lighten(@rama-bg, 10%);
+@tag-text: @rama-text;
+
+// Navigation / tabs
+@nav-link: @rama-text;
+@nav-link-hover: lighten(@rama-accent, 8%);
+@nav-border: fade(@rama-gray, 40%);
+
+// Search bar
+@search-bar-bg: @input-bg;
+@search-bar-border: @panel-border;
+@search-bar-shadow: 0 6px 18px fade(@rama-bg, 65%);
+
+// Results
+@result-title: @rama-text;
+@result-url: lighten(@rama-gray, 20%);
+@result-description: @rama-text;
+@highlight: @rama-accent;
+
+// Pagination
+@pagination-bg: @panel-bg;
+@pagination-border: @panel-border;
+@pagination-text: @rama-text;
+@pagination-active-bg: @rama-accent;
+@pagination-active-text: @rama-text;
+
+// Alerts
+@alert-info-bg: lighten(@rama-bg, 8%);
+@alert-info-border: fade(@rama-gray, 40%);
+@alert-info-text: @rama-text;
+@alert-error-bg: fade(@rama-accent-2, 25%);
+@alert-error-border: @rama-accent-2;
+@alert-error-text: @rama-text;
+
+// Misc
+@shadow-strong: 0 12px 32px fade(@rama-bg, 55%);
+@border-radius: 10px;
