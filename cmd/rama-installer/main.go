@@ -14,16 +14,18 @@ import (
 )
 
 // Installer copies RAMA assets into a SearXNG checkout and can patch settings.yml.
-// If -searxng is omitted, it will try to auto-detect common install locations and
+// If --searxng is omitted, it will try to auto-detect common install locations and
 // perform a shallow search. Requires sudo/root (writes into system paths).
 
 var (
-    flagSearxng   string
-    flagTheme     string
-    flagSettings  string
+    flagSearxng    string
+    flagTheme      string
+    flagSettings   string
     flagSetDefault bool
-    flagVerbose   bool
-    flagDryRun    bool
+    flagVerbose    bool
+    flagDryRun     bool
+    flagDepth      int
+    flagBases      []string
 )
 
 func main() {
@@ -31,13 +33,16 @@ func main() {
         Use:   "rama-installer",
         Short: "Install RAMA theme assets into SearXNG",
         RunE: func(cmd *cobra.Command, args []string) error {
+            // Fun header first
+            printHeader()
+
             if os.Geteuid() != 0 {
                 return errors.New("rama-installer must be run as root (sudo)")
             }
             viper.AutomaticEnv()
             viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
-            searxRoot, err := detectSearxngRoot(flagSearxng, flagVerbose)
+            searxRoot, err := detectSearxngRoot(flagSearxng, flagVerbose, flagDepth, flagBases)
             if err != nil {
                 return err
             }
@@ -77,8 +82,7 @@ func main() {
                 logf("Patched default theme to '%s' in %s", flagTheme, sp)
             }
 
-            printHeader()
-    fmt.Println("Installed RAMA assets successfully.")
+            fmt.Println("Installed RAMA assets successfully.")
             fmt.Printf("Theme: %s\n", dstTheme)
             fmt.Printf("Logo : %s\n", dstLogo)
             return nil
@@ -91,6 +95,8 @@ func main() {
     rootCmd.Flags().BoolVar(&flagSetDefault, "set-default-theme", false, "Set default theme in settings.yml")
     rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "Verbose logging")
     rootCmd.Flags().BoolVar(&flagDryRun, "dry-run", false, "Detect and validate without writing files")
+    rootCmd.Flags().IntVar(&flagDepth, "search-depth", 6, "Max depth for fallback search")
+    rootCmd.Flags().StringSliceVar(&flagBases, "search-bases", nil, "Comma-separated extra bases to search (fallback)")
 
     // Bind env overrides for convenience
     _ = viper.BindPFlag("searxng", rootCmd.Flags().Lookup("searxng"))
@@ -106,7 +112,7 @@ func main() {
     }
 }
 
-func detectSearxngRoot(userPath string, verbose bool) (string, error) {
+func detectSearxngRoot(userPath string, verbose bool, maxDepth int, extraBases []string) (string, error) {
     candidates := []string{}
     if userPath != "" {
         candidates = append(candidates, userPath)
@@ -125,9 +131,15 @@ func detectSearxngRoot(userPath string, verbose bool) (string, error) {
         filepath.Join(home, "searxng"),
         filepath.Join(home, "SearXNG"),
         filepath.Join(home, ".local", "share", "searxng"),
-        "/opt/searxng", "/opt/searx/searxng", "/srv/searxng", "/usr/local/share/searxng", "/var/lib/searxng", "/usr/share/searxng", "/etc/searxng",
+        filepath.Join(home, "github"),
+        filepath.Join(home, "projects"),
+        filepath.Join(home, "workspace"),
+        filepath.Join(home, "Downloads"),
+        "/home", // scan other users if accessible
+        "/opt/searxng", "/opt/searx/searxng", "/srv/searxng", "/usr/local/share/searxng", "/var/lib/searxng", "/usr/share/searxng", "/etc/searxng", "/app", "/workspace",
     }
     candidates = append(candidates, defaults...)
+    candidates = append(candidates, extraBases...)
 
     seen := map[string]bool{}
     for _, c := range candidates {
@@ -152,16 +164,17 @@ func detectSearxngRoot(userPath string, verbose bool) (string, error) {
         }
     }
 
-    // Fallback shallow search in likely bases
-    searchBases := []string{home, "/opt", "/srv", "/usr/local/share", "/var/lib", "/usr/share", "/etc"}
+    searchBases := []string{home, "/home", "/opt", "/srv", "/usr/local/share", "/var/lib", "/usr/share", "/etc", "/app", "/workspace"}
+    searchBases = append(searchBases, extraBases...)
+
     for _, base := range searchBases {
         if base == "" {
             continue
         }
         if verbose {
-            fmt.Printf("[detect] scanning under %s (depth<=3)\n", base)
+            fmt.Printf("[detect] scanning under %s (depth<=%d)\n", base, maxDepth)
         }
-        if found := shallowSearch(base, 3, verbose); found != "" {
+        if found := shallowSearch(base, maxDepth, verbose); found != "" {
             return found, nil
         }
     }
@@ -284,15 +297,6 @@ func mustAbs(rel string) string {
     return p
 }
 
-func logf(format string, args ...interface{}) {
-    fmt.Printf(format+"\n", args...)
-}
-
-func exitErr(msg string, args ...interface{}) {
-    fmt.Fprintf(os.Stderr, msg+"\n", args...)
-    os.Exit(1)
-}
-
 func printHeader() {
     path := mustAbs("assets/RAMA.txt")
     data, err := os.ReadFile(path)
@@ -300,4 +304,13 @@ func printHeader() {
         return
     }
     fmt.Println(string(data))
+}
+
+func logf(format string, args ...interface{}) {
+    fmt.Printf(format+"\n", args...)
+}
+
+func exitErr(msg string, args ...interface{}) {
+    fmt.Fprintf(os.Stderr, msg+"\n", args...)
+    os.Exit(1)
 }
