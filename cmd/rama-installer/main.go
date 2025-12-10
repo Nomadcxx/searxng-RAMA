@@ -210,14 +210,23 @@ func (m model) View() string {
 
 	var content strings.Builder
 
-	// SearXNG ASCII Header
-	asciiArt := ` ████████ ██████████   ██████   ████████   ████  ████ ████    ████   ████████
+	// SearXNG ASCII Header - render as single block to avoid lipgloss padding issues
+	asciiArt := `████████ ██████████   ██████   ████████   ████  ████ ████    ████   ████████
 ████       ████       ████  ████ ████  ████ ████  ████ ██████  ████ ████
 ██████████ ████████   ████  ████ ████  ████   ██████   ████████████ ████  ████
       ████ ████       ██████████ ████████   ████  ████ ████  ██████ ████  ████
 ████████   ██████████ ████  ████ ████  ████ ████  ████ ████    ████   ████████`
 
-	content.WriteString(headerStyle.Render(asciiArt))
+	// Apply styling to entire ASCII block at once
+	styledASCII := headerStyle.Render(asciiArt)
+
+	// Center the ASCII art
+	centeredASCII := lipgloss.NewStyle().
+		Width(m.width).
+		Align(lipgloss.Center).
+		Render(styledASCII)
+
+	content.WriteString(centeredASCII)
 	content.WriteString("\n\n")
 
 	// Title
