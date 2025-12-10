@@ -262,7 +262,15 @@ func (m model) View() string {
 		content.WriteString("\n" + helpStyle.Render(helpText))
 	}
 
-	return content.String()
+	// Wrap everything in background
+	bgStyle := lipgloss.NewStyle().
+		Background(lipgloss.Color("#000000")).
+		Foreground(Primary).
+		Width(m.width).
+		Height(m.height).
+		Align(lipgloss.Center, lipgloss.Top)
+
+	return bgStyle.Render(content.String())
 }
 
 func (m model) renderWelcome() string {
