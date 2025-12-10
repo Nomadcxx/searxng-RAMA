@@ -1,4 +1,4 @@
-# SearXNG RAMA Edition
+![SearXNG RAMA Edition](brand/searxng.png)
 
 A pre-configured SearXNG fork with custom theme and sensible privacy-focused defaults.
 
@@ -23,43 +23,18 @@ sudo ./rama-installer
 ```
 
 The installer presents a terminal interface with two options:
-- Install RAMA SearXNG
-- Uninstall RAMA SearXNG
+- Install SearXNG (RAMA Edition)
+- Uninstall SearXNG (RAMA Edition)
 
 Use arrow keys or k/j to navigate, Enter to select, Ctrl+C or q to quit.
 
 ## Installation Details
 
-The installer performs the following tasks:
-- Validates source installation at `/home/nomadx/searxng-custom`
-- Creates installation directory at `/opt/searxng-rama`
-- Copies all SearXNG files
-- Sets up Python virtual environment and installs dependencies
-- Configures secure defaults (generates secret key, sets port 8855, enables external access)
-- Creates systemd service
-- Enables and starts the service
-
-After installation, SearXNG RAMA will be accessible at `http://localhost:8855`.
+The installer validates your source installation, then deploys all SearXNG files to `/opt/searxng-rama`. It sets up a Python virtual environment and installs dependencies, configures secure defaults including an auto-generated secret key and port 8855 for external access, then creates and enables a systemd service. After installation completes, SearXNG RAMA will be accessible at `http://localhost:8855`.
 
 ## Uninstallation
 
-The installer can also remove RAMA SearXNG:
-- Stops and disables the systemd service
-- Removes all installation files
-- Removes systemd service file
-
-## Development
-
-Generate logo from ASCII art:
-```bash
-./scripts/generate_logo_png.py
-```
-
-Build static assets:
-```bash
-cd /home/nomadx/searxng-custom/client/simple
-npx vite build
-```
+The uninstaller stops and disables the systemd service, removes all installation files from `/opt/searxng-rama`, and cleans up the systemd service configuration.
 
 ## Requirements
 
