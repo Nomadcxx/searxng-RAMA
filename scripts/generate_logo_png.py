@@ -8,7 +8,6 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 
 # RAMA color palette
-BG_COLOR = "#2b2d42"      # Space cadet blue
 TEXT_COLOR = "#ef233c"    # Pantone red
 
 # Read ASCII art
@@ -34,8 +33,8 @@ max_line_length = max(len(line) for line in ascii_lines)
 img_width = int(max_line_length * char_width) + 40  # Add padding
 img_height = int(len(ascii_lines) * char_height) + 40  # Add padding
 
-# Create image
-img = Image.new('RGB', (img_width, img_height), BG_COLOR)
+# Create image with transparent background (RGBA mode)
+img = Image.new('RGBA', (img_width, img_height), (0, 0, 0, 0))
 draw = ImageDraw.Draw(img)
 
 # Try to use a monospace font
@@ -59,4 +58,4 @@ output_file = "/home/nomadx/searxng-custom/client/simple/src/brand/searxng.png"
 img.save(output_file, 'PNG')
 print(f"✓ Generated {output_file}")
 print(f"  Dimensions: {img_width}x{img_height}px")
-print(f"  Colors: {BG_COLOR} (bg), {TEXT_COLOR} (text)")
+print(f"  Transparent background with {TEXT_COLOR} text")
