@@ -292,19 +292,14 @@ func (m model) renderWelcome() string {
 	if m.selectedOption == 0 {
 		installPrefix = lipgloss.NewStyle().Foreground(Accent).Render("▸ ")
 	}
-	b.WriteString(installPrefix + "Install RAMA SearXNG\n")
-	b.WriteString("    Deploys pre-built RAMA-themed SearXNG\n")
-	b.WriteString(lipgloss.NewStyle().Foreground(FgMuted).Render(fmt.Sprintf("    Source: %s\n", m.sourcePath)))
-	b.WriteString(lipgloss.NewStyle().Foreground(FgMuted).Render(fmt.Sprintf("    Target: %s\n", m.installPath)))
-	b.WriteString("\n")
+	b.WriteString(installPrefix + "Install SearXNG (RAMA Edition)\n\n")
 
 	// Uninstall option
 	uninstallPrefix := "  "
 	if m.selectedOption == 1 {
 		uninstallPrefix = lipgloss.NewStyle().Foreground(Accent).Render("▸ ")
 	}
-	b.WriteString(uninstallPrefix + "Uninstall RAMA SearXNG\n")
-	b.WriteString("    Removes RAMA SearXNG from your system\n\n")
+	b.WriteString(uninstallPrefix + "Uninstall SearXNG (RAMA Edition)\n\n")
 
 	b.WriteString(lipgloss.NewStyle().Foreground(FgMuted).Render("Requires root privileges"))
 
