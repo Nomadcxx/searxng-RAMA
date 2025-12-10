@@ -12,13 +12,14 @@ A pre-configured SearXNG fork with custom theme and sensible privacy-focused def
 
 ## Quick Start
 
-Build the installer:
+One-line install:
 ```bash
-go build -o rama-installer ./cmd/rama-installer/
+curl -fsSL https://raw.githubusercontent.com/Nomadcxx/searxng-RAMA/main/install.sh | sudo bash
 ```
 
-Run the installer (requires root):
+Or build and run manually:
 ```bash
+go build -o rama-installer ./cmd/rama-installer/
 sudo ./rama-installer
 ```
 
