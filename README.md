@@ -1,13 +1,14 @@
-# SearXNG RAMA
+# SearXNG RAMA Edition
 
-A complete RAMA-branded SearXNG distribution with custom theme and automated installer.
+A pre-configured SearXNG fork with custom theme and sensible privacy-focused defaults.
 
 ## Features
 
 - Custom RAMA color palette (space cadet blue #2b2d42, pantone red #ef233c)
-- ASCII art-based logo converted to PNG
-- Pre-built SearXNG with RAMA theme baked into static assets
-- TUI installer for automated deployment
+- ASCII art-based logo
+- Pre-built static assets
+- Automated TUI installer
+- Secure defaults (auto-generated secret keys, center alignment)
 
 ## Quick Start
 
@@ -34,11 +35,11 @@ The installer performs the following tasks:
 - Creates installation directory at `/opt/searxng-rama`
 - Copies all SearXNG files
 - Sets up Python virtual environment and installs dependencies
-- Configures settings (generates secure secret key, sets port 8855, enables external access)
+- Configures secure defaults (generates secret key, sets port 8855, enables external access)
 - Creates systemd service
 - Enables and starts the service
 
-After installation, SearXNG RAMA will be accessible at `http://localhost:8855` or your configured domain.
+After installation, SearXNG RAMA will be accessible at `http://localhost:8855`.
 
 ## Uninstallation
 
@@ -59,17 +60,6 @@ Build static assets:
 cd /home/nomadx/searxng-custom/client/simple
 npx vite build
 ```
-
-## Configuration
-
-The installer automatically configures:
-- Port: 8855
-- Bind address: 0.0.0.0 (accessible externally)
-- Base URL: https://searxng.archpcx.one
-- Secret key: Automatically generated secure random key
-- Center alignment: Enabled
-
-Settings can be modified after installation in `/opt/searxng-rama/searx/settings.yml`.
 
 ## Requirements
 

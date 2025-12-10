@@ -210,13 +210,13 @@ func (m model) View() string {
 
 	var content strings.Builder
 
-	// RAMA ASCII Header
+	// SearXNG ASCII Header
 	headerLines := []string{
-		"████████      ██████    ████      ████     ██████  ",
-		"████  ████  ████  ████  ██████  ██████   ████  ████",
-		"████  ████  ████  ████  ██████████████   ████  ████",
-		"████████    ██████████  ████  ██  ████   ██████████",
-		"████  ████  ████  ████  ████      ████   ████  ████",
+		" ████████ ██████████   ██████   ████████   ████  ████ ████    ████   ████████",
+		"████       ████       ████  ████ ████  ████ ████  ████ ██████  ████ ████      ",
+		"██████████ ████████   ████  ████ ████  ████   ██████   ████████████ ████  ████",
+		"      ████ ████       ██████████ ████████   ████  ████ ████  ██████ ████  ████",
+		"████████   ██████████ ████  ████ ████  ████ ████  ████ ████    ████   ████████",
 	}
 
 	for _, line := range headerLines {
@@ -230,9 +230,9 @@ func (m model) View() string {
 		Foreground(Accent).
 		Bold(true).
 		Align(lipgloss.Center)
-	title := "RAMA SearXNG Installer"
+	title := "SearXNG Installer : RAMA Edition"
 	if m.uninstallMode {
-		title = "RAMA SearXNG Uninstaller"
+		title = "SearXNG Uninstaller : RAMA Edition"
 	}
 	content.WriteString(titleStyle.Render(title))
 	content.WriteString("\n\n")
@@ -535,12 +535,11 @@ func setupConfiguration(m *model) error {
 	// Generate secret key
 	secretKey := generateSecretKey()
 
-	// Modify settings: update secret_key, port, bind_address, and base_url
+	// Modify settings: update secret_key, port, and bind_address
 	settingsStr := string(defaultSettings)
 	settingsStr = strings.Replace(settingsStr, `secret_key: "ultrasecretkey"`, `secret_key: "`+secretKey+`"`, 1)
 	settingsStr = strings.Replace(settingsStr, "port: 8888", "port: 8855", 1)
 	settingsStr = strings.Replace(settingsStr, `bind_address: "127.0.0.1"`, `bind_address: "0.0.0.0"`, 1)
-	settingsStr = strings.Replace(settingsStr, `base_url: false  # "http://example.com/location"`, `base_url: "https://searxng.archpcx.one"`, 1)
 
 	return os.WriteFile(settingsPath, []byte(settingsStr), 0o644)
 }
