@@ -1,39 +1,83 @@
-# searxng-RAMA theme assets
+# SearXNG RAMA
 
-Minimal RAMA theme assets for SearXNG.
+A complete RAMA-branded SearXNG distribution with custom theme and automated installer.
 
-## Contents
-- `theme/rama/definitions.less` — RAMA color palette and UI variables.
-- `brand/rama.svg` — Logo generated from `/home/nomadx/bit/RAMA.txt` (ASCII blocks to SVG).
-- `scripts/generate_logo_svg.py` — Regenerate the SVG from the ASCII source.
-- `cmd/rama-installer` — Go CLI to install the theme into a SearXNG checkout.
+## Features
 
-## Regenerate logo
+- Custom RAMA color palette (space cadet blue #2b2d42, pantone red #ef233c)
+- ASCII art-based logo converted to PNG
+- Pre-built SearXNG with RAMA theme baked into static assets
+- TUI installer for automated deployment
+
+## Quick Start
+
+Build the installer:
 ```bash
-./scripts/generate_logo_svg.py
+go build -o rama-installer ./cmd/rama-installer/
 ```
 
-## Installer
-Build:
+Run the installer (requires root):
 ```bash
-go build ./cmd/rama-installer
+sudo ./rama-installer
 ```
-Run (example):
+
+The installer presents a terminal interface with two options:
+- Install RAMA SearXNG
+- Uninstall RAMA SearXNG
+
+Use arrow keys or k/j to navigate, Enter to select, Ctrl+C or q to quit.
+
+## Installation Details
+
+The installer performs the following tasks:
+- Validates source installation at `/home/nomadx/searxng-custom`
+- Creates installation directory at `/opt/searxng-rama`
+- Copies all SearXNG files
+- Sets up Python virtual environment and installs dependencies
+- Configures settings (generates secure secret key, sets port 8855, enables external access)
+- Creates systemd service
+- Enables and starts the service
+
+After installation, SearXNG RAMA will be accessible at `http://localhost:8855` or your configured domain.
+
+## Uninstallation
+
+The installer can also remove RAMA SearXNG:
+- Stops and disables the systemd service
+- Removes all installation files
+- Removes systemd service file
+
+## Development
+
+Generate logo from ASCII art:
 ```bash
-./rama-installer -searxng /path/to/searxng -set-default-theme
+./scripts/generate_logo_png.py
 ```
-Flags:
-- `-searxng` (required): path to SearXNG repo.
-- `-theme-name` (default: `rama`): target theme name.
-- `-set-default-theme`: patch `searx/settings.yml` to set the default theme.
-- `-settings`: optional explicit settings.yml path.
 
-What it does:
-- Copies `theme/rama/definitions.less` to `<searxng>/client/simple/src/less/themes/<theme>/definitions.less`.
-- Copies `brand/rama.svg` to `<searxng>/client/simple/src/brand/<theme>.svg`.
-- If `-set-default-theme`, patches `searx/settings.yml` `theme:` key.
+Build static assets:
+```bash
+cd /home/nomadx/searxng-custom/client/simple
+npx vite build
+```
 
-## Integrate manually (optional)
-- Drop `theme/rama/definitions.less` into your SearXNG theme path and include it in the build.
-- Replace the SearXNG logo asset reference with `brand/rama.svg`.
-- Rebuild static assets per your SearXNG setup (e.g., `make themes.simple`).
+## Configuration
+
+The installer automatically configures:
+- Port: 8855
+- Bind address: 0.0.0.0 (accessible externally)
+- Base URL: https://searxng.archpcx.one
+- Secret key: Automatically generated secure random key
+- Center alignment: Enabled
+
+Settings can be modified after installation in `/opt/searxng-rama/searx/settings.yml`.
+
+## Requirements
+
+- Go 1.21 or later
+- Python 3.8 or later
+- Root access for installation
+- SearXNG source at `/home/nomadx/searxng-custom`
+
+## License
+
+This project customizes SearXNG, which is licensed under AGPLv3.

@@ -1,0 +1,20 @@
+# Binary
+rama-installer
+
+# Development files
+*.md.bak
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.egg-info/
+
+# Go
+*.test
+*.out
+vendor/
