@@ -211,19 +211,14 @@ func (m model) View() string {
 	var content strings.Builder
 
 	// SearXNG ASCII Header
-	headerLines := []string{
-		" ████████ ██████████   ██████   ████████   ████  ████ ████    ████   ████████",
-		"████       ████       ████  ████ ████  ████ ████  ████ ██████  ████ ████      ",
-		"██████████ ████████   ████  ████ ████  ████   ██████   ████████████ ████  ████",
-		"      ████ ████       ██████████ ████████   ████  ████ ████  ██████ ████  ████",
-		"████████   ██████████ ████  ████ ████  ████ ████  ████ ████    ████   ████████",
-	}
+	asciiArt := ` ████████ ██████████   ██████   ████████   ████  ████ ████    ████   ████████
+████       ████       ████  ████ ████  ████ ████  ████ ██████  ████ ████
+██████████ ████████   ████  ████ ████  ████   ██████   ████████████ ████  ████
+      ████ ████       ██████████ ████████   ████  ████ ████  ██████ ████  ████
+████████   ██████████ ████  ████ ████  ████ ████  ████ ████    ████   ████████`
 
-	for _, line := range headerLines {
-		content.WriteString(headerStyle.Render(line))
-		content.WriteString("\n")
-	}
-	content.WriteString("\n")
+	content.WriteString(headerStyle.Render(asciiArt))
+	content.WriteString("\n\n")
 
 	// Title
 	titleStyle := lipgloss.NewStyle().
@@ -267,15 +262,7 @@ func (m model) View() string {
 		content.WriteString("\n" + helpStyle.Render(helpText))
 	}
 
-	// Wrap everything in background
-	bgStyle := lipgloss.NewStyle().
-		Background(BgBase).
-		Foreground(Primary).
-		Width(m.width).
-		Height(m.height).
-		Align(lipgloss.Center, lipgloss.Top)
-
-	return bgStyle.Render(content.String())
+	return content.String()
 }
 
 func (m model) renderWelcome() string {
