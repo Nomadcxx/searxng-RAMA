@@ -34,11 +34,8 @@ Use arrow keys or k/j to navigate, Enter to select, Ctrl+C or q to quit.
 
 ### Docker Installation
 ```bash
-# Build the image
-docker build -t searxng-rama .
-
-# Run the container
-docker run -d --name searxng-rama -p 8855:8855 searxng-rama:latest
+# Pull and run the container directly from GHCR
+docker run -d --name searxng-rama -p 8855:8855 ghcr.io/nomadcxx/searxng-rama:latest
 ```
 
 SearXNG RAMA will be accessible at `http://localhost:8855`.
@@ -49,6 +46,16 @@ docker-compose up -d
 ```
 
 SearXNG RAMA will be accessible at `http://localhost:8855`.
+
+### Building from Source
+If you prefer to build the image yourself:
+```bash
+# Build the image
+docker build -t searxng-rama .
+
+# Run the container
+docker run -d --name searxng-rama -p 8855:8855 searxng-rama:latest
+```
 
 ## Installation Details
 

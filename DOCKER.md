@@ -4,14 +4,21 @@ This provides Docker support for SearXNG RAMA Edition with the custom theme and 
 
 ## Quick Start
 
-### Using Docker Compose (Recommended)
+### Using Pre-built Image (Recommended)
+Pull and run the container directly from GitHub Container Registry:
+
+```bash
+docker run -d --name searxng-rama -p 8855:8855 ghcr.io/nomadcxx/searxng-rama:latest
+```
+
+### Using Docker Compose (Recommended for production)
 Build and run the container:
 
 ```bash
 docker-compose up -d
 ```
 
-### Using Docker Directly
+### Using Docker Directly (Building from source)
 Build and run the container:
 
 ```bash
