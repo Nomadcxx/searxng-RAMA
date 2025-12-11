@@ -1,0 +1,13 @@
+services:
+  searxng-rama:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: searxng-rama:latest
+    ports:
+      - "8855:8855"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: searxng-rama-network
