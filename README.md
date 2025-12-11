@@ -63,35 +63,34 @@ The installer validates your source installation, then deploys all SearXNG files
 
 ## Docker Deployment
 
-This project includes full Docker support for easy deployment. The Docker setup:
+This project includes full Docker support for easy deployment. 
 
+### Quick Start Options
+
+1. **Pre-built Image (Easiest)**:
+   ```bash
+   docker run -d --name searxng-rama -p 8855:8855 ghcr.io/nomadcxx/searxng-rama:latest
+   ```
+
+2. **Docker Compose (Recommended for production)**:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Build from Source**:
+   ```bash
+   docker build -t searxng-rama .
+   docker run -d --name searxng-rama -p 8855:8855 searxng-rama
+   ```
+
+The Docker setup:
 - Uses Ubuntu 22.04 as the base image
 - Installs all required dependencies
 - Bootstraps SearXNG RAMA Edition with the custom theme
 - Automatically generates secret keys and configures settings
 - Exposes port 8855 to match the native installation
 
-To deploy using Docker:
-```bash
-docker-compose up -d
-```
-
 The container will be available at http://localhost:8855 with the RAMA theme and all custom branding.
-
-For a standalone container:
-```bash
-docker build -t searxng-rama .
-docker run -d --name searxng-rama -p 8855:8855 searxng-rama
-```
-
-### Build Script
-
-A build script is provided for easier Docker image creation:
-```bash
-./scripts/build-docker.sh
-```
-
-This script will automatically detect if you have a local SearXNG source directory and use it for faster builds, or clone the source during the Docker build process.
 
 ## Uninstallation
 
