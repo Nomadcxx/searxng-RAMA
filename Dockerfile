@@ -19,11 +19,18 @@ RUN apt-get update && apt-get install -y \
 # Create the expected source directory
 RUN mkdir -p /home/nomadx/searxng-custom
 
-# Copy the SearXNG source
-COPY searxng-custom /home/nomadx/searxng-custom
-
 # Copy the RAMA project files
 COPY . /app/searxng-RAMA
+
+# Clone SearXNG source if not provided in build context
+RUN if [ ! -d "/home/nomadx/searxng-custom/searx" ]; then \
+        echo "Cloning SearXNG source..." && \
+        cd /home/nomadx && \
+        git clone https://github.com/searxng/searxng.git searxng-custom && \
+        chown -R root:root /home/nomadx/searxng-custom; \
+    else \
+        echo "Using provided SearXNG source"; \
+    fi
 
 # Run the Docker bootstrap script
 RUN /app/searxng-RAMA/scripts/bootstrap-docker.sh
