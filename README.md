@@ -34,6 +34,17 @@ Use arrow keys or k/j to navigate, Enter to select, Ctrl+C or q to quit.
 
 ### Docker Installation
 ```bash
+# Build the image
+docker build -t searxng-rama .
+
+# Run the container
+docker run -d --name searxng-rama -p 8855:8855 searxng-rama:latest
+```
+
+SearXNG RAMA will be accessible at `http://localhost:8855`.
+
+### Docker Compose Installation
+```bash
 docker-compose up -d
 ```
 

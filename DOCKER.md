@@ -4,10 +4,22 @@ This provides Docker support for SearXNG RAMA Edition with the custom theme and 
 
 ## Quick Start
 
+### Using Docker Compose (Recommended)
 Build and run the container:
 
 ```bash
 docker-compose up -d
+```
+
+### Using Docker Directly
+Build and run the container:
+
+```bash
+# Build the image
+docker build -t searxng-rama .
+
+# Run the container
+docker run -d --name searxng-rama -p 8855:8855 searxng-rama:latest
 ```
 
 Access SearXNG at http://localhost:8855
