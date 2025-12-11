@@ -1,3 +1,5 @@
+# SearXNG RAMA Edition
+
 ![SearXNG RAMA Edition](brand/searxng.png)
 
 A pre-configured SearXNG fork with custom theme and sensible privacy-focused defaults.
@@ -58,6 +60,21 @@ docker-compose up -d
 
 The container will be available at http://localhost:8855 with the RAMA theme and all custom branding.
 
+For a standalone container:
+```bash
+docker build -t searxng-rama .
+docker run -d --name searxng-rama -p 8855:8855 searxng-rama
+```
+
+### Build Script
+
+A build script is provided for easier Docker image creation:
+```bash
+./scripts/build-docker.sh
+```
+
+This script will automatically detect if you have a local SearXNG source directory and use it for faster builds, or clone the source during the Docker build process.
+
 ## Uninstallation
 
 The uninstaller stops and disables the systemd service, removes all installation files from `/opt/searxng-rama`, and cleans up the systemd service configuration.
@@ -67,7 +84,7 @@ The uninstaller stops and disables the systemd service, removes all installation
 - Go 1.21 or later
 - Python 3.8 or later
 - Root access for installation
-- SearXNG source at `/home/nomadx/searxng-custom`
+- SearXNG source at `/home/nomadx/searxng-custom` (for native installation)
 
 ## License
 
