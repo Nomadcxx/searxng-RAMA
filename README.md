@@ -1,7 +1,5 @@
 ![SearXNG RAMA Edition](brand/searxng.png)
 
-![SearXNG RAMA Screenshot](brand/screenshot.png)
-
 A pre-configured SearXNG fork with custom theme and sensible privacy-focused defaults.
 
 ## Features
@@ -10,6 +8,8 @@ A pre-configured SearXNG fork with custom theme and sensible privacy-focused def
 - Pre-built static assets
 - Automated TUI installer
 - Secure defaults (auto-generated secret keys, center alignment)
+
+![SearXNG RAMA Screenshot](brand/screenshot.png)
   
 ## Installation
 
