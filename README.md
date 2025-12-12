@@ -1,5 +1,3 @@
-# SearXNG RAMA Edition
-
 ![SearXNG RAMA Edition](brand/searxng.png)
 
 A pre-configured SearXNG fork with custom theme and sensible privacy-focused defaults.
