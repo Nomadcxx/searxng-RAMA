@@ -5,7 +5,6 @@ A pre-configured SearXNG fork with custom theme and sensible privacy-focused def
 ## Features
 
 - Custom RAMA color palette (space cadet blue #2b2d42, pantone red #ef233c)
-- ASCII art-based logo
 - Pre-built static assets
 - Automated TUI installer
 - Secure defaults (auto-generated secret keys, center alignment)
