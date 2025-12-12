@@ -8,97 +8,40 @@ A pre-configured SearXNG fork with custom theme and sensible privacy-focused def
 - Pre-built static assets
 - Automated TUI installer
 - Secure defaults (auto-generated secret keys, center alignment)
+  
+## Installation
 
-## Quick Start
-
-### Native Installation
-One-line install:
+Installer:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Nomadcxx/searxng-RAMA/main/install.sh | sudo bash
 ```
 
-Or build and run manually:
+build and run manually:
 ```bash
+git clone https://github.com/Nomadcxx/searxng-RAMA.git
+cd searxng-RAMA
 go build -o rama-installer ./cmd/rama-installer/
 sudo ./rama-installer
 ```
 
-The installer presents a terminal interface with two options:
-- Install SearXNG (RAMA Edition)
-- Uninstall SearXNG (RAMA Edition)
-
-Use arrow keys or k/j to navigate, Enter to select, Ctrl+C or q to quit.
-
 ### Docker Installation
 ```bash
-# Pull and run the container directly from GHCR
 docker run -d --name searxng-rama -p 8855:8855 ghcr.io/nomadcxx/searxng-rama:latest
 ```
-
-SearXNG RAMA will be accessible at `http://localhost:8855`.
 
 ### Docker Compose Installation
 ```bash
 docker-compose up -d
 ```
 
-SearXNG RAMA will be accessible at `http://localhost:8855`.
-
-### Building from Source
-If you prefer to build the image yourself:
-```bash
-# Build the image
-docker build -t searxng-rama .
-
-# Run the container
-docker run -d --name searxng-rama -p 8855:8855 searxng-rama:latest
-```
-
 ## Installation Details
 
-The installer validates your source installation, then deploys all SearXNG files to `/opt/searxng-rama`. It sets up a Python virtual environment and installs dependencies, configures secure defaults including an auto-generated secret key and port 8855 for external access, then creates and enables a systemd service. After installation completes, SearXNG RAMA will be accessible at `http://localhost:8855`.
-
-## Docker Deployment
-
-This project includes full Docker support for easy deployment. 
-
-### Quick Start Options
-
-1. **Pre-built Image (Easiest)**:
-   ```bash
-   docker run -d --name searxng-rama -p 8855:8855 ghcr.io/nomadcxx/searxng-rama:latest
-   ```
-
-2. **Docker Compose (Recommended for production)**:
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Build from Source**:
-   ```bash
-   docker build -t searxng-rama .
-   docker run -d --name searxng-rama -p 8855:8855 searxng-rama
-   ```
-
-The Docker setup:
-- Uses Ubuntu 22.04 as the base image
-- Installs all required dependencies
-- Bootstraps SearXNG RAMA Edition with the custom theme
-- Automatically generates secret keys and configures settings
-- Exposes port 8855 to match the native installation
-
-The container will be available at http://localhost:8855 with the RAMA theme and all custom branding.
+The installer validates your source installation, then deploys all SearXNG files to `/opt/searxng-rama`. It sets up a virtual environment, nstalls dependencies, configures secure default, generates secret key and port 8855 for external access, then starts/enables a systemd service. After installation, should will be accessible at <http://localhost:8855>.
 
 ## Uninstallation
 
-The uninstaller stops and disables the systemd service, removes all installation files from `/opt/searxng-rama`, and cleans up the systemd service configuration.
+The TUI provides an uninstaller which will stop/disable the systemd service, remove installation files from `/opt/searxng-rama`
 
 ## Requirements
 
 - Go 1.21 or later
-- Python 3.8 or later
-- Root access for installation
-
-## License
-
-This project customizes SearXNG, which is licensed under AGPLv3.
