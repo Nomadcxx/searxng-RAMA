@@ -99,7 +99,6 @@ The uninstaller stops and disables the systemd service, removes all installation
 - Go 1.21 or later
 - Python 3.8 or later
 - Root access for installation
-- SearXNG source at `/home/nomadx/searxng-custom` (for native installation)
 
 ## License
 
