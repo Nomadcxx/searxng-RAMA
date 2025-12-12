@@ -9,7 +9,10 @@ A pre-configured SearXNG fork with custom theme and sensible privacy-focused def
 - Automated TUI installer
 - Secure defaults (auto-generated secret keys, center alignment)
 
-![SearXNG RAMA Screenshot](brand/screenshot.png)
+<div style="display: flex; gap: 10px; margin: 20px 0;">
+  <img src="brand/screenshot.png" alt="SearXNG RAMA Main" width="400" style="flex: 1;"/>
+  <img src="brand/screenshot_search.png" alt="SearXNG RAMA Search" width="400" style="flex: 1;"/>
+</div>
   
 ## Installation
 
