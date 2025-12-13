@@ -108,7 +108,17 @@ package() {
     fi
   fi
   
-  # Modify the installed settings.yml like Go installer does (after base files are installed)
+  # Find where settings.yml was installed by the wheel and copy it to the application directory
+  local _site_packages="$(python -c 'import site, os; print(os.path.relpath(site.getsitepackages()[0]))')"
+  if [ -f "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/settings.yml" ]; then
+    # Copy settings from site-packages to application directory
+    install -Dm644 "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/settings.yml" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
+  else
+    # Fallback: copy from source if wheel didn't install it
+    install -Dm644 "searx/settings.yml" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
+  fi
+  
+  # Modify the installed settings.yml like Go installer does
   sed -i -e "s/secret_key: \"ultrasecretkey\"/secret_key: \"$(openssl rand -hex 32)\"/" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
   sed -i "s/port: 8888/port: 8855/" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
   sed -i 's/bind_address: "127.0.0.1"/bind_address: "0.0.0.0"/' "${pkgdir}/opt/searxng-rama/searx/settings.yml"
