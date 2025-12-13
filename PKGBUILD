@@ -77,11 +77,6 @@ package() {
   # exit virtual environment
   deactivate
 
-  # Modify the installed settings.yml like Go installer does (don't replace it)
-  sed -i -e "s/secret_key: \"ultrasecretkey\"/secret_key: \"$(openssl rand -hex 32)\"/" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
-  sed -i "s/port: 8888/port: 8855/" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
-  sed -i 's/bind_address: "127.0.0.1"/bind_address: "0.0.0.0"/' "${pkgdir}/opt/searxng-rama/searx/settings.yml"
-  
   # Install limiter config
   install -Dm644 "searx/limiter.toml" "${pkgdir}/opt/searxng-rama/searx/limiter.toml"
   
@@ -112,6 +107,11 @@ package() {
       cp -r brand/. "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/img/brand/"
     fi
   fi
+  
+  # Modify the installed settings.yml like Go installer does (after base files are installed)
+  sed -i -e "s/secret_key: \"ultrasecretkey\"/secret_key: \"$(openssl rand -hex 32)\"/" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
+  sed -i "s/port: 8888/port: 8855/" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
+  sed -i 's/bind_address: "127.0.0.1"/bind_address: "0.0.0.0"/' "${pkgdir}/opt/searxng-rama/searx/settings.yml"
   
   # Create executable wrapper
   install -d "$pkgdir/usr/bin"
