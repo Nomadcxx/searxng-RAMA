@@ -1,0 +1,127 @@
+# SearXNG RAMA Edition settings
+# This is a custom settings file for RAMA Edition
+
+use_default_settings:
+  - settings.yml  # Load default settings as base
+
+general:
+  debug: false
+  instance_name: "RAMA Search"
+  privacypolicy_url: false
+  donation_url: false
+  contact_url: false
+  enable_metrics: true
+
+brand:
+  new_issue_url: https://github.com/Nomadcxx/searxng-RAMA/issues
+  docs_url: https://github.com/Nomadcxx/searxng-RAMA
+  public_instances: https://github.com/Nomadcxx/searxng-RAMA
+  wiki_url: https://github.com/Nomadcxx/searxng-RAMA/wiki
+
+server:
+  port: 8855
+  bind_address: "0.0.0.0"
+  secret_key: "ultrasecretkey"  # This will be replaced by openssl rand -hex 32
+  limiter: false
+  ui_default_locale: ""
+
+ui:
+  static_path: ""
+  default_locale: ""
+  theme_args:
+    theme: rama
+    center_alignment: true
+    results_on_new_tab: false
+    infinite_scroll: false
+    display_results_with: table-row
+    results_in_new_tab: false
+    advanced_search: true
+    query_in_title: true
+    locale: en
+  infinite_scroll: false
+  results_on_new_tab: false
+  center_alignment: true
+  theme: rama
+  default_theme: rama
+  theme_args:
+    theme: rama
+    center_alignment: true
+
+search:
+  safe_search: 0
+  language: en
+  ban_time_on_fail: 5
+  max_ban_time_on_fail: 120
+  default_categories:
+    - general
+    - images
+    - videos
+    - news
+    - map
+    - music
+    - it
+    - science
+    - files
+    - social_media
+
+outgoing:
+  request_timeout: 3.0
+  max_request_timeout: 10.0
+  useragent_suffix: ""
+  pool_connections: 100
+  pool_maxsize: 100
+  enable_http: true
+  enable_http2: true
+  retries: 0
+  max_redirects: 30
+
+engines:
+  - name: duckduckgo
+    disabled: false
+    weight: 2
+  - name: google
+    disabled: false
+    weight: 2
+  - name: bing
+    disabled: false
+    weight: 1
+  - name: brave
+    disabled: false
+    weight: 1
+  - name: startpage
+    disabled: false
+    weight: 1
+
+plugins:
+  - name: ahmia
+  - name: hash_plugin
+  - name: hostname_replace
+  - name: infinite_scroll
+  - name: open_links_on_new_tab
+  - name: search_on_site
+  - name: self_info
+  - name: theme_switcher
+  - name: tracker_url_remover
+  - name: vim_hotkeys
+
+redis:
+  url: false
+
+valkey:
+  url: false
+
+image_proxy:
+  url: false
+  key: false
+
+default_categories: []
+
+enabled_plugins:
+  - "Hostname replace"
+  - "Open links on new tab"
+  - "Self info"
+  - "Search on site"
+  - "Tracker URL remover"
+  - "Vim hotkeys"
+
+disabled_plugins: []
