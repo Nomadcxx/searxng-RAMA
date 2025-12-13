@@ -77,14 +77,14 @@ package() {
   # exit virtual environment
   deactivate
 
-  # Install limiter config
-  install -Dm644 "searx/limiter.toml" "${pkgdir}/opt/searxng-rama/searx/limiter.toml"
+  # Install limiter config from source
+  install -Dm644 "${_pkgname}/searx/limiter.toml" "${pkgdir}/opt/searxng-rama/searx/limiter.toml"
   
-  # Install version info
-  install -Dm644 "searx/version_frozen.py" "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/version_frozen.py"
+  # Install version info from source
+  install -Dm644 "${_pkgname}/searx/version_frozen.py" "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/version_frozen.py"
   
-  # Install licenses
-  install -Dm644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  # Install licenses from source
+  install -Dm644 "${_pkgname}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
   install -Dm644 "${srcdir}/searxng-RAMA/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/RAMA_LICENSE" 2>/dev/null || true
   
   # Install RAMA customizations from our repo
@@ -93,18 +93,18 @@ package() {
     
     # Modify the simple theme with RAMA styling (like Go installer does)
     if [ -f "theme/definitions.less" ]; then
-      cp theme/definitions.less "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/src/less/definitions.less"
+      cp theme/definitions.less "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/static/themes/simple/src/less/definitions.less"
     fi
     
     # Install RAMA branding assets to simple theme
     if [ -d "assets" ]; then
-      install -dm755 "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/img"
-      cp -r assets/. "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/img/"
+      install -dm755 "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/static/themes/simple/img"
+      cp -r assets/. "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/static/themes/simple/img/"
     fi
     
     if [ -d "brand" ]; then
-      install -dm755 "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/img/brand"
-      cp -r brand/. "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/img/brand/"
+      install -dm755 "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/static/themes/simple/img/brand"
+      cp -r brand/. "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/static/themes/simple/img/brand/"
     fi
   fi
   
@@ -115,7 +115,7 @@ package() {
     install -Dm644 "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/settings.yml" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
   else
     # Fallback: copy from source if wheel didn't install it
-    install -Dm644 "searx/settings.yml" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
+    install -Dm644 "${_pkgname}/searx/settings.yml" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
   fi
   
   # Modify the installed settings.yml like Go installer does
