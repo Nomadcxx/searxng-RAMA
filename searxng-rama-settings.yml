@@ -2,7 +2,7 @@
 # This is a custom settings file for RAMA Edition
 
 use_default_settings:
-  - settings.yml  # Load default settings as base
+  - settings.yml
 
 general:
   debug: false
@@ -43,26 +43,13 @@ ui:
   center_alignment: true
   theme: rama
   default_theme: rama
-  theme_args:
-    theme: rama
-    center_alignment: true
 
 search:
   safe_search: 0
   language: en
   ban_time_on_fail: 5
   max_ban_time_on_fail: 120
-  default_categories:
-    - general
-    - images
-    - videos
-    - news
-    - map
-    - music
-    - it
-    - science
-    - files
-    - social_media
+  default_categories: []
 
 outgoing:
   request_timeout: 3.0
@@ -75,35 +62,6 @@ outgoing:
   retries: 0
   max_redirects: 30
 
-engines:
-  - name: duckduckgo
-    disabled: false
-    weight: 2
-  - name: google
-    disabled: false
-    weight: 2
-  - name: bing
-    disabled: false
-    weight: 1
-  - name: brave
-    disabled: false
-    weight: 1
-  - name: startpage
-    disabled: false
-    weight: 1
-
-plugins:
-  - name: ahmia
-  - name: hash_plugin
-  - name: hostname_replace
-  - name: infinite_scroll
-  - name: open_links_on_new_tab
-  - name: search_on_site
-  - name: self_info
-  - name: theme_switcher
-  - name: tracker_url_remover
-  - name: vim_hotkeys
-
 redis:
   url: false
 
@@ -113,15 +71,3 @@ valkey:
 image_proxy:
   url: false
   key: false
-
-default_categories: []
-
-enabled_plugins:
-  - "Hostname replace"
-  - "Open links on new tab"
-  - "Self info"
-  - "Search on site"
-  - "Tracker URL remover"
-  - "Vim hotkeys"
-
-disabled_plugins: []
