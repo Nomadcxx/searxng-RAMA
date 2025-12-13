@@ -8,7 +8,7 @@ arch=('any')
 url="https://github.com/Nomadcxx/searxng-RAMA"
 license=('AGPL3')
 depends=('python' 'systemd')
-makedepends=('openssl' 'git' 'python-build' 'python-wheel' 'python-setuptools'  'python-msgspec')
+makedepends=('openssl' 'git' 'python-build' 'python-wheel' 'python-setuptools')
 optdepends=(
     'redis: Caching support for improved performance'
     'valkey: Alternative caching support'
@@ -36,12 +36,20 @@ pkgver() {
 build() {
   cd $_pkgname
 
+  # Create build environment with dependencies if python-msgspec is not available
+  if ! python -c "import msgspec" 2>/dev/null; then
+    echo "Creating build environment with dependencies..."
+    python -m venv buildenv
+    source buildenv/bin/activate
+    pip install msgspec httpx flask lxml babel jinja2 pygments pyyaml dateutil
+  fi
+
   # Use RAMA custom settings file for build
   export SEARXNG_SETTINGS_PATH="${srcdir}/searxng-rama-settings.yml"
   
   # Generate random secret key in our custom settings
   sed -i -e "s/ultrasecretkey/`openssl rand -hex 32`/g" "${SEARXNG_SETTINGS_PATH}"
-  
+
   # Generate version info
   python -m searx.version freeze
   sed -i "s|GIT_URL =.*|GIT_URL = \"${_giturl}\"|g" searx/version_frozen.py
@@ -49,6 +57,11 @@ build() {
   
   # generate the wheel using the system python-build
   python -m build --no-isolation --wheel
+  
+  # Deactivate build environment if we created one
+  if [[ "${VIRTUAL_ENV:-}" == *"buildenv"* ]]; then
+    deactivate
+  fi
 }
 
 package() {
