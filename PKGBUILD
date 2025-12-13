@@ -78,13 +78,13 @@ package() {
   deactivate
 
   # Install limiter config from source
-  install -Dm644 "${_pkgname}/searx/limiter.toml" "${pkgdir}/opt/searxng-rama/searx/limiter.toml"
+  install -Dm644 "${srcdir}/${_pkgname}/searx/limiter.toml" "${pkgdir}/opt/searxng-rama/searx/limiter.toml"
   
   # Install version info from source
-  install -Dm644 "${_pkgname}/searx/version_frozen.py" "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/version_frozen.py"
+  install -Dm644 "${srcdir}/${_pkgname}/searx/version_frozen.py" "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/version_frozen.py"
   
   # Install licenses from source
-  install -Dm644 "${_pkgname}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm644 "${srcdir}/${_pkgname}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
   install -Dm644 "${srcdir}/searxng-RAMA/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/RAMA_LICENSE" 2>/dev/null || true
   
   # Install RAMA customizations from our repo
@@ -115,7 +115,7 @@ package() {
     install -Dm644 "${pkgdir}/opt/searxng-rama/${_site_packages}/searx/settings.yml" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
   else
     # Fallback: copy from source if wheel didn't install it
-    install -Dm644 "${_pkgname}/searx/settings.yml" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
+    install -Dm644 "${srcdir}/${_pkgname}/searx/settings.yml" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
   fi
   
   # Modify the installed settings.yml like Go installer does
