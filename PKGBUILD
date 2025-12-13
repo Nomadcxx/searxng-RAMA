@@ -23,10 +23,8 @@ install=${pkgname}.install
 _giturl="https://github.com/searxng/searxng"
 _gitbranch="master"
 source=(git+$_giturl#branch=$_gitbranch
-        git+https://github.com/Nomadcxx/searxng-RAMA.git
-        'searxng-rama-settings.yml')
-b2sums=('SKIP' 'SKIP'
-        'SKIP')
+        git+https://github.com/Nomadcxx/searxng-RAMA.git)
+b2sums=('SKIP' 'SKIP')
 
 pkgver() {
   cd $_pkgname
@@ -36,11 +34,14 @@ pkgver() {
 build() {
   cd $_pkgname
 
-  # Use RAMA custom settings file for build
-  export SEARXNG_SETTINGS_PATH="${srcdir}/searxng-rama-settings.yml"
+  # Modify existing settings.yml like Go installer does
+  secret_key=$(openssl rand -hex 32)
+  sed -i -e "s/secret_key: \"ultrasecretkey\"/secret_key: \"$secret_key\"/" "searx/settings.yml"
+  sed -i "s/port: 8888/port: 8855/" "searx/settings.yml"
+  sed -i 's/bind_address: "127.0.0.1"/bind_address: "0.0.0.0"/' "searx/settings.yml"
   
-  # Generate random secret key in our custom settings
-  sed -i -e "s/ultrasecretkey/`openssl rand -hex 32`/g" "${SEARXNG_SETTINGS_PATH}"
+  # Use the modified settings for build
+  export SEARXNG_SETTINGS_PATH="searx/settings.yml"
 
   # Generate version info
   python -m searx.version freeze
@@ -76,8 +77,10 @@ package() {
   # exit virtual environment
   deactivate
 
-  # Install RAMA custom settings (overwrite the default ones)
-  install -Dm644 "${srcdir}/searxng-rama-settings.yml" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
+  # Modify the installed settings.yml like Go installer does (don't replace it)
+  sed -i -e "s/secret_key: \"ultrasecretkey\"/secret_key: \"$(openssl rand -hex 32)\"/" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
+  sed -i "s/port: 8888/port: 8855/" "${pkgdir}/opt/searxng-rama/searx/settings.yml"
+  sed -i 's/bind_address: "127.0.0.1"/bind_address: "0.0.0.0"/' "${pkgdir}/opt/searxng-rama/searx/settings.yml"
   
   # Install limiter config
   install -Dm644 "searx/limiter.toml" "${pkgdir}/opt/searxng-rama/searx/limiter.toml"
