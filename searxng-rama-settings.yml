@@ -25,7 +25,7 @@ ui:
   static_path: ""
   default_locale: ""
   theme_args:
-    theme: rama
+    theme: simple
     center_alignment: true
     results_on_new_tab: false
     infinite_scroll: false
@@ -37,8 +37,8 @@ ui:
   infinite_scroll: false
   results_on_new_tab: false
   center_alignment: true
-  theme: rama
-  default_theme: rama
+  theme: simple
+  default_theme: simple
 
 search:
   safe_search: 0

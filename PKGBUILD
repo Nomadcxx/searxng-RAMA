@@ -8,7 +8,7 @@ arch=('any')
 url="https://github.com/Nomadcxx/searxng-RAMA"
 license=('AGPL3')
 depends=('python' 'systemd')
-makedepends=('openssl' 'git' 'python-build' 'python-wheel' 'python-setuptools')
+makedepends=('openssl' 'git' 'python-build' 'python-wheel' 'python-setuptools'  'python-msgspec')
 optdepends=(
     'redis: Caching support for improved performance'
     'valkey: Alternative caching support'
@@ -36,14 +36,6 @@ pkgver() {
 build() {
   cd $_pkgname
 
-  # Create build environment with dependencies if python-msgspec is not available
-  if ! python -c "import msgspec" 2>/dev/null; then
-    echo "Creating build environment with dependencies..."
-    python -m venv buildenv
-    source buildenv/bin/activate
-    pip install msgspec httpx flask lxml babel jinja2 pygments pyyaml dateutil
-  fi
-
   # Use RAMA custom settings file for build
   export SEARXNG_SETTINGS_PATH="${srcdir}/searxng-rama-settings.yml"
   
@@ -57,11 +49,6 @@ build() {
   
   # generate the wheel using the system python-build
   python -m build --no-isolation --wheel
-  
-  # Deactivate build environment if we created one
-  if [[ "${VIRTUAL_ENV:-}" == *"buildenv"* ]]; then
-    deactivate
-  fi
 }
 
 package() {
@@ -106,14 +93,21 @@ package() {
   if [ -d "${srcdir}/searxng-RAMA" ]; then
     cd "${srcdir}/searxng-RAMA"
     
-    # Install custom RAMA theme
-    install -dm755 "${pkgdir}/opt/searxng-rama/searxng_extra/theme"
-    cp -r theme/. "${pkgdir}/opt/searxng-rama/searxng_extra/theme/"
+    # Modify the simple theme with RAMA styling (like Go installer does)
+    if [ -f "theme/definitions.less" ]; then
+      cp theme/definitions.less "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/src/less/definitions.less"
+    fi
     
-    # Install RAMA branding assets
-    install -dm755 "${pkgdir}/opt/searxng-rama/searx/static/themes/rama"
-    cp -r assets/. "${pkgdir}/opt/searxng-rama/searx/static/themes/rama/"
-    cp -r brand/. "${pkgdir}/opt/searxng-rama/searx/static/themes/rama/brand/"
+    # Install RAMA branding assets to simple theme
+    if [ -d "assets" ]; then
+      install -dm755 "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/img"
+      cp -r assets/. "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/img/"
+    fi
+    
+    if [ -d "brand" ]; then
+      install -dm755 "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/img/brand"
+      cp -r brand/. "${pkgdir}/opt/searxng-rama/searx/static/themes/simple/img/brand/"
+    fi
   fi
   
   # Create executable wrapper
