@@ -1,9 +1,6 @@
 # SearXNG RAMA Edition settings
 # This is a custom settings file for RAMA Edition
 
-use_default_settings:
-  - settings.yml
-
 general:
   debug: false
   instance_name: "RAMA Search"
@@ -23,7 +20,6 @@ server:
   bind_address: "0.0.0.0"
   secret_key: "ultrasecretkey"  # This will be replaced by openssl rand -hex 32
   limiter: false
-  ui_default_locale: ""
 
 ui:
   static_path: ""
