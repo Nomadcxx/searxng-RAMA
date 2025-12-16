@@ -1,76 +1,331 @@
-@import "../../searxng_theme_base.less";
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
-/* RAMA Palette */
-@rama-bg: #2b2d42;        // space cadet
-@rama-text: #edf2f4;      // anti-flash white
-@rama-accent: #ef233c;    // pantone red
-@rama-accent-2: #d90429;  // fire engine red
-@rama-gray: #8d99ae;      // cool gray
+/*
+ * RAMA Theme for SearXNG
+ * A privacy-respecting, hackable metasearch engine
+ *
+ * RAMA color palette:
+ * - Background: #2b2d42 (space cadet)
+ * - Text: #edf2f4 (anti-flash white)
+ * - Accent: #ef233c (pantone red)
+ * - Accent 2: #d90429 (fire engine red)
+ * - Gray: #8d99ae (cool gray)
+ */
 
-// Core variables
-@body-background: @rama-bg;
-@header-background: @rama-bg;
-@footer-background: darken(@rama-bg, 4%);
-@text-color: @rama-text;
-@link-color: @rama-accent;
-@link-color-hover: lighten(@rama-accent, 5%);
-@link-color-visited: lighten(@rama-accent, 2%);
+/// RAMA Typography - Modern Editorial
+// Using system fonts for privacy (no external CDN requests)
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-// Buttons
-@button-primary-bg: @rama-accent;
-@button-primary-bg-hover: lighten(@rama-accent, 6%);
-@button-primary-text: @rama-text;
-@button-secondary-bg: lighten(@rama-bg, 8%);
-@button-secondary-bg-hover: lighten(@rama-bg, 12%);
-@button-secondary-text: @rama-text;
+/// RAMA Dark Theme (Default)
+:root {
+  /// Typography - Modern Editorial Font Stack
+  --font-display: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Courier New", monospace;
 
-// Inputs
-@input-bg: lighten(@rama-bg, 6%);
-@input-bg-focus: lighten(@rama-bg, 10%);
-@input-text: @rama-text;
-@input-placeholder: fade(@rama-text, 50%);
-@input-border: @rama-gray;
+  /// Base Colors
+  --color-base-font: #edf2f4;
+  --color-base-font-rgb: 237, 242, 244;
+  --color-base-background: #2b2d42;
+  --color-base-background-mobile: #2b2d42;
+  --color-url-font: #ef233c;
+  --color-url-visited-font: #d90429;
+  /// Header Colors
+  --color-header-background: #2b2d42;
+  --color-header-border: #8d99ae;
+  /// Footer Colors
+  --color-footer-background: #24263a;
+  --color-footer-border: #8d99ae;
+  /// Sidebar Colors
+  --color-sidebar-border: #8d99ae;
+  --color-sidebar-font: #edf2f4;
+  --color-sidebar-background: #323447;
+  /// BackToTop Colors
+  --color-backtotop-font: #edf2f4;
+  --color-backtotop-border: #8d99ae;
+  --color-backtotop-background: #323447;
+  /// Button Colors
+  --color-btn-background: #ef233c;
+  --color-btn-font: #edf2f4;
+  --color-show-btn-background: #8d99ae;
+  --color-show-btn-font: #2b2d42;
+  /// Search Input Colors
+  --color-search-border: #8d99ae;
+  --color-search-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+  --color-search-background: #323447;
+  --color-search-font: #edf2f4;
+  --color-search-background-hover: #ef233c;
+  /// Modal Colors
+  --color-error: #ef233c;
+  --color-error-background: #d90429;
+  --color-warning: #dbba34;
+  --color-warning-background: #9d8424;
+  --color-success: #42db34;
+  --color-success-background: #2d9724;
+  /// Categories Colors
+  --color-categories-item-selected-font: #ef233c;
+  --color-categories-item-border-selected: #ef233c;
+  /// Autocomplete Colors
+  --color-autocomplete-font: #edf2f4;
+  --color-autocomplete-border: #8d99ae;
+  --color-autocomplete-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+  --color-autocomplete-background: #323447;
+  --color-autocomplete-background-hover: #3d3f54;
+  /// Answer Colors
+  --color-answer-font: #edf2f4;
+  --color-answer-background: #323447;
+  // colors of the KeyValue result class
+  --color-result-keyvalue-col-table: #2b2d42;
+  --color-result-keyvalue-odd: #2b2d42;
+  --color-result-keyvalue-even: #323447;
+  /// Results Colors
+  --color-result-background: #323447;
+  --color-result-border: #8d99ae;
+  --color-result-url-font: #edf2f4;
+  --color-result-vim-selected: #3d3f54;
+  --color-result-vim-arrow: #ef233c;
+  --color-result-description-highlight-font: #edf2f4;
+  --color-result-link-font: #ef233c;
+  --color-result-link-font-highlight: #ef233c;
+  --color-result-link-visited-font: #d90429;
+  --color-result-publishdate-font: #8d99ae;
+  --color-result-engines-font: #8d99ae;
+  --color-result-search-url-border: #8d99ae;
+  --color-result-search-url-font: #edf2f4;
+  /// Detail modal
+  --color-result-detail-font: #edf2f4;
+  --color-result-detail-label-font: #8d99ae;
+  --color-result-detail-background: #2b2d42;
+  --color-result-detail-hr: #8d99ae;
+  --color-result-detail-link: #ef233c;
+  --color-result-detail-loader-border: rgb(255 255 255 / 20%);
+  --color-result-detail-loader-borderleft: rgb(0 0 0 / 0%);
+  // Images Colors
+  --color-result-image-span-font: #edf2f4;
+  --color-result-image-span-font-selected: #2b2d42;
+  --color-result-image-background: #2b2d42;
+  /// Settings Colors
+  --color-settings-tr-hover: #3d3f54;
+  --color-settings-engine-description-font: #8d99ae;
+  --color-settings-table-group-background: #24263a;
+  /// Toolkit Colors
+  --color-toolkit-badge-font: #edf2f4;
+  --color-toolkit-badge-background: #8d99ae;
+  --color-toolkit-kbd-font: #2b2d42;
+  --color-toolkit-kbd-background: #edf2f4;
+  --color-toolkit-dialog-border: #8d99ae;
+  --color-toolkit-dialog-background: #2b2d42;
+  --color-toolkit-tabs-label-border: #2b2d42;
+  --color-toolkit-tabs-section-border: #8d99ae;
+  --color-toolkit-select-background: #323447;
+  --color-toolkit-select-border: #8d99ae;
+  --color-toolkit-select-background-hover: #3d3f54;
+  --color-toolkit-input-text-font: #edf2f4;
+  --color-toolkit-checkbox-onoff-off-background: #323447;
+  --color-toolkit-checkbox-onoff-on-background: #323447;
+  --color-toolkit-checkbox-onoff-on-mark-background: #ef233c;
+  --color-toolkit-checkbox-onoff-on-mark-color: #edf2f4;
+  --color-toolkit-checkbox-onoff-off-mark-background: #8d99ae;
+  --color-toolkit-checkbox-onoff-off-mark-color: #2b2d42;
+  --color-toolkit-checkbox-label-background: #2b2d42;
+  --color-toolkit-checkbox-label-border: #8d99ae;
+  --color-toolkit-checkbox-input-border: #ef233c;
+  --color-toolkit-engine-tooltip-border: #8d99ae;
+  --color-toolkit-engine-tooltip-background: #2b2d42;
+  --color-toolkit-loader-border: rgb(255 255 255 / 20%);
+  --color-toolkit-loader-borderleft: rgb(0 0 0 / 0%);
+  --color-doc-code: #edf2f4;
+  --color-doc-code-background: #4d5a6f;
+  // Favicons Colors
+  --color-favicon-background-color: #8d99ae;
+  --color-favicon-border-color: #8d99ae;
+  /// Other misc colors
+  --color-bar-chart-primary: #ef233c;
+  --color-bar-chart-secondary: #d90429;
+  --color-image-resolution-background: rgb(0 0 0 / 50%);
+  --color-image-resolution-font: #edf2f4;
+  --color-loading-indicator: rgb(255 255 255 / 20%);
+  --color-loading-indicator-gap: #edf2f4;
+  --color-line-number: #8d99ae;
+}
 
-// Cards / panels
-@panel-bg: lighten(@rama-bg, 4%);
-@panel-border: fade(@rama-gray, 40%);
-@panel-shadow: 0 8px 24px fade(@rama-bg, 60%);
+.dark-themes() {
+  // RAMA theme is already dark, so this is the same
+  /// Base Colors
+  --color-base-font: #edf2f4;
+  --color-base-font-rgb: 237, 242, 244;
+  --color-base-background: #2b2d42;
+  --color-base-background-mobile: #2b2d42;
+  --color-url-font: #ef233c;
+  --color-url-visited-font: #d90429;
+  /// Header Colors
+  --color-header-background: #2b2d42;
+  --color-header-border: #8d99ae;
+  /// Footer Colors
+  --color-footer-background: #24263a;
+  --color-footer-border: #8d99ae;
+  /// Sidebar Colors
+  --color-sidebar-border: #8d99ae;
+  --color-sidebar-font: #edf2f4;
+  --color-sidebar-background: #323447;
+  /// BackToTop Colors
+  --color-backtotop-font: #edf2f4;
+  --color-backtotop-border: #8d99ae;
+  --color-backtotop-background: #323447;
+  /// Button Colors
+  --color-btn-background: #ef233c;
+  --color-btn-font: #edf2f4;
+  --color-show-btn-background: #8d99ae;
+  --color-show-btn-font: #2b2d42;
+  /// Search Input Colors
+  --color-search-border: #8d99ae;
+  --color-search-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+  --color-search-background: #323447;
+  --color-search-font: #edf2f4;
+  --color-search-background-hover: #ef233c;
+  /// Modal Colors
+  --color-error: #ef233c;
+  --color-error-background: #d90429;
+  --color-warning: #dbba34;
+  --color-warning-background: #9d8424;
+  --color-success: #42db34;
+  --color-success-background: #2d9724;
+  /// Categories Colors
+  --color-categories-item-selected-font: #ef233c;
+  --color-categories-item-border-selected: #ef233c;
+  /// Autocomplete Colors
+  --color-autocomplete-font: #edf2f4;
+  --color-autocomplete-border: #8d99ae;
+  --color-autocomplete-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+  --color-autocomplete-background: #323447;
+  --color-autocomplete-background-hover: #3d3f54;
+  /// Answer Colors
+  --color-answer-font: #edf2f4;
+  --color-answer-background: #323447;
+  // colors of the KeyValue result class
+  --color-result-keyvalue-col-table: #2b2d42;
+  --color-result-keyvalue-odd: #2b2d42;
+  --color-result-keyvalue-even: #323447;
+  /// Results Colors
+  --color-result-background: #323447;
+  --color-result-border: #8d99ae;
+  --color-result-url-font: #edf2f4;
+  --color-result-vim-selected: #3d3f54;
+  --color-result-vim-arrow: #ef233c;
+  --color-result-description-highlight-font: #edf2f4;
+  --color-result-link-font: #ef233c;
+  --color-result-link-font-highlight: #ef233c;
+  --color-result-link-visited-font: #d90429;
+  --color-result-publishdate-font: #8d99ae;
+  --color-result-engines-font: #8d99ae;
+  --color-result-search-url-border: #8d99ae;
+  --color-result-search-url-font: #edf2f4;
+  /// Detail modal
+  --color-result-detail-font: #edf2f4;
+  --color-result-detail-label-font: #8d99ae;
+  --color-result-detail-background: #2b2d42;
+  --color-result-detail-hr: #8d99ae;
+  --color-result-detail-link: #ef233c;
+  --color-result-detail-loader-border: rgb(255 255 255 / 20%);
+  --color-result-detail-loader-borderleft: rgb(0 0 0 / 0%);
+  // Images Colors
+  --color-result-image-span-font: #edf2f4;
+  --color-result-image-span-font-selected: #2b2d42;
+  --color-result-image-background: #2b2d42;
+  /// Settings Colors
+  --color-settings-tr-hover: #3d3f54;
+  --color-settings-engine-description-font: #8d99ae;
+  --color-settings-table-group-background: #24263a;
+  /// Toolkit Colors
+  --color-toolkit-badge-font: #edf2f4;
+  --color-toolkit-badge-background: #8d99ae;
+  --color-toolkit-kbd-font: #2b2d42;
+  --color-toolkit-kbd-background: #edf2f4;
+  --color-toolkit-dialog-border: #8d99ae;
+  --color-toolkit-dialog-background: #2b2d42;
+  --color-toolkit-tabs-label-border: #2b2d42;
+  --color-toolkit-tabs-section-border: #8d99ae;
+  --color-toolkit-select-background: #323447;
+  --color-toolkit-select-border: #8d99ae;
+  --color-toolkit-select-background-hover: #3d3f54;
+  --color-toolkit-input-text-font: #edf2f4;
+  --color-toolkit-checkbox-onoff-off-background: #323447;
+  --color-toolkit-checkbox-onoff-on-background: #323447;
+  --color-toolkit-checkbox-onoff-on-mark-background: #ef233c;
+  --color-toolkit-checkbox-onoff-on-mark-color: #edf2f4;
+  --color-toolkit-checkbox-onoff-off-mark-background: #8d99ae;
+  --color-toolkit-checkbox-onoff-off-mark-color: #2b2d42;
+  --color-toolkit-checkbox-label-background: #2b2d42;
+  --color-toolkit-checkbox-label-border: #8d99ae;
+  --color-toolkit-checkbox-input-border: #ef233c;
+  --color-toolkit-engine-tooltip-border: #8d99ae;
+  --color-toolkit-engine-tooltip-background: #2b2d42;
+  --color-toolkit-loader-border: rgb(255 255 255 / 20%);
+  --color-toolkit-loader-borderleft: rgb(0 0 0 / 0%);
+  --color-doc-code: #edf2f4;
+  --color-doc-code-background: #4d5a6f;
+  // Favicons Colors
+  --color-favicon-background-color: #8d99ae;
+  --color-favicon-border-color: #8d99ae;
+}
 
-// Tags / badges
-@tag-bg: lighten(@rama-bg, 10%);
-@tag-text: @rama-text;
+.black-themes() {
+  --color-base-background: #1a1c2e;
+  --color-base-background-mobile: #1a1c2e;
+  --color-header-background: #1a1c2e;
+  --color-footer-background: #1a1c2e;
+  --color-sidebar-background: #1a1c2e;
+}
 
-// Navigation / tabs
-@nav-link: @rama-text;
-@nav-link-hover: lighten(@rama-accent, 8%);
-@nav-border: fade(@rama-gray, 40%);
+/// Dark Theme (autoswitch based on device pref)
+@media (prefers-color-scheme: dark) {
+  :root.theme-auto {
+    .dark-themes();
+  }
+}
 
-// Search bar
-@search-bar-bg: @input-bg;
-@search-bar-border: @panel-border;
-@search-bar-shadow: 0 6px 18px fade(@rama-bg, 65%);
+// Dark Theme by preferences
+:root.theme-dark {
+  .dark-themes();
+}
 
-// Results
-@result-title: @rama-text;
-@result-url: lighten(@rama-gray, 20%);
-@result-description: @rama-text;
-@highlight: @rama-accent;
+:root.theme-black {
+  .dark-themes();
+  .black-themes();
+}
 
-// Pagination
-@pagination-bg: @panel-bg;
-@pagination-border: @panel-border;
-@pagination-text: @rama-text;
-@pagination-active-bg: @rama-accent;
-@pagination-active-text: @rama-text;
+/// General Size
+@results-width: 45rem;
+@results-sidebar-width: 25rem;
+@results-offset: 10rem;
+@results-tablet-offset: 0.5rem;
+@results-gap: 5rem;
+@results-margin: 0.125rem;
+@result-padding: 1rem;
+@results-image-row-height: 12rem;
+@results-image-row-height-phone: 10rem;
+@search-width: 44rem;
+// height of #search, see detail.less
+@search-height: 13rem;
+@search-padding-horizontal: 0.5rem;
 
-// Alerts
-@alert-info-bg: lighten(@rama-bg, 8%);
-@alert-info-border: fade(@rama-gray, 40%);
-@alert-info-text: @rama-text;
-@alert-error-bg: fade(@rama-accent-2, 25%);
-@alert-error-border: @rama-accent-2;
-@alert-error-text: @rama-text;
+/// Device Size
+/// @desktop > @tablet
+@tablet: 79.75em; // see https://github.com/searxng/searxng/issues/874
+@phone: 50em;
+@small-phone: 35em;
+@ultra-small-phone: 20rem;
 
-// Misc
-@shadow-strong: 0 12px 32px fade(@rama-bg, 55%);
-@border-radius: 10px;
+/// From style.less
+@stacked-bar-chart: rgb(0, 0, 0);
+
+/// Load fonts from this directory.
+@icon-font-path: "../../../fonts/";
+//** File name for all font files.
+@icon-font-name: "glyphicons-halflings-regular";
+//** Element ID within SVG icon file.
+@icon-font-svg-id: "glyphicons_halflingsregular";
+
+// decoration of the select HTML elements
+@select-light-svg-path: "../svg/select-light.svg";
+@select-dark-svg-path: "../svg/select-dark.svg";
