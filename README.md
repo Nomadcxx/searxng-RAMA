@@ -9,9 +9,9 @@ SearXNG fork with a custom theme and privacy-first defaults out of the box.
 - TUI installer handles everything
 - Generates secure keys automatically, uses center alignment
 
-<div style="display: flex; gap: 10px; margin: 20px 0;">
-  <img src="brand/screenshot.png" alt="SearXNG RAMA Main" width="400" style="flex: 1;"/>
-  <img src="brand/screenshot_search.png" alt="SearXNG RAMA Search" width="400" style="flex: 1;"/>
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 20px 0;">
+  <img src="brand/screenshot.png" alt="SearXNG RAMA Main" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"/>
+  <img src="brand/screenshot_search.png" alt="SearXNG RAMA Search" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"/>
 </div>
   
 ## Installation
