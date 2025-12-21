@@ -18,3 +18,17 @@ __pycache__/
 *.test
 *.out
 vendor/
+
+# Build artifacts
+src/
+pkg/
+searxng/
+searxng-RAMA/
+searxng-custom/
+*.pkg.tar.zst
+*.pkg.tar.xz
+
+# Temporary files
+*.txt
+.claude
+PKGBUILD.reference

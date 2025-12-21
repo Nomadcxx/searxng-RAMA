@@ -1,13 +1,13 @@
 ![SearXNG RAMA Edition](brand/searxng.png)
 
-A pre-configured SearXNG fork with custom theme and sensible privacy-focused defaults.
+SearXNG fork with a custom theme and privacy-first defaults out of the box.
 
 ## Features
 
-- Custom RAMA color palette (space cadet blue #2b2d42, pantone red #ef233c)
-- Pre-built static assets
-- Automated TUI installer
-- Secure defaults (auto-generated secret keys, center alignment)
+- Custom RAMA color scheme (space cadet blue #2b2d42, pantone red #ef233c)
+- Static assets included
+- TUI installer handles everything
+- Generates secure keys automatically, uses center alignment
 
 <div style="display: flex; gap: 10px; margin: 20px 0;">
   <img src="brand/screenshot.png" alt="SearXNG RAMA Main" width="400" style="flex: 1;"/>
@@ -16,12 +16,25 @@ A pre-configured SearXNG fork with custom theme and sensible privacy-focused def
   
 ## Installation
 
-Installer:
+### Arch Linux (AUR)
+```bash
+yay -S searxng-rama
+# or
+paru -S searxng-rama
+```
+
+After installation, start and enable the service:
+```bash
+sudo systemctl start searxng-rama.service
+sudo systemctl enable searxng-rama.service
+```
+
+### Quick Install Script
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Nomadcxx/searxng-RAMA/main/install.sh | sudo bash
 ```
 
-build and run manually:
+### Manual Build
 ```bash
 git clone https://github.com/Nomadcxx/searxng-RAMA.git
 cd searxng-RAMA
@@ -41,11 +54,11 @@ docker-compose up -d
 
 ## Installation Details
 
-The installer validates your source installation, then deploys all SearXNG files to `/opt/searxng-rama`. It sets up a virtual environment, nstalls dependencies, configures secure default, generates secret key and port 8855 for external access, then starts/enables a systemd service. After installation, should will be accessible at <http://localhost:8855>.
+The installer copies everything to `/opt/searxng-rama`, sets up a virtual environment, installs dependencies, generates a secret key, and configures the service to run on port 8855. Once done, visit <http://localhost:8855>.
 
 ## Uninstallation
 
-The TUI provides an uninstaller which will stop/disable the systemd service, remove installation files from `/opt/searxng-rama`
+Run the installer again and choose uninstall. It'll stop the service and clean up `/opt/searxng-rama`.
 
 ## Requirements
 

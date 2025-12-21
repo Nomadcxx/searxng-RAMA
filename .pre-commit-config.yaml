@@ -1,0 +1,33 @@
+# Pre-commit hooks for SearXNG RAMA Edition
+# Checks for AI-generated content and other quality issues
+
+repos:
+  # Local hooks
+  - repo: local
+    hooks:
+      - id: check-ai-content
+        name: Check for AI-generated content patterns
+        entry: scripts/check-ai-content.sh
+        language: script
+        files: \.(md|txt|rst|adoc)$
+        pass_filenames: false
+        always_run: false
+        
+      - id: check-secrets
+        name: Check for hardcoded secrets
+        entry: scripts/check-secrets.sh
+        language: script
+        files: \.(yml|yaml|json|py|sh|go)$
+        pass_filenames: false
+        always_run: false
+
+  # External hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
