@@ -443,10 +443,13 @@ RAMA SearXNG has been removed.
 Press Enter to exit`
 	}
 
+	selectedTheme := availableThemes[m.selectedTheme]
+
 	return fmt.Sprintf(`Installation complete!
 
 Installation directory: %s
 Configuration file: %s/searx/settings.yml
+Selected theme: %s
 
 Systemd service: %s
   Enable and start: sudo systemctl enable --now %s
@@ -455,7 +458,14 @@ Systemd service: %s
 
 Access RAMA Search at http://localhost:8855
 
-Press Enter to exit`, m.installPath, m.installPath, m.serviceName, m.serviceName, m.serviceName, m.serviceName)
+Press Enter to exit`,
+		m.installPath,
+		m.installPath,
+		selectedTheme.name,
+		m.serviceName,
+		m.serviceName,
+		m.serviceName,
+		m.serviceName)
 }
 
 func (m model) getHelpText() string {
