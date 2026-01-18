@@ -58,6 +58,34 @@ type installTask struct {
 	status      taskStatus
 }
 
+type theme struct {
+	id          string
+	name        string
+	description string
+	path        string
+}
+
+var availableThemes = []theme{
+	{
+		id:          "rama",
+		name:        "RAMA (Dark)",
+		description: "Original dark theme with space cadet blue and RAMA red accents",
+		path:        "theme/rama",
+	},
+	{
+		id:          "google-light",
+		name:        "Google (Light)",
+		description: "Google-inspired light theme with refined minimalism",
+		path:        "theme/google",
+	},
+	{
+		id:          "google-dark",
+		name:        "Google (Dark)",
+		description: "Google-inspired dark theme with refined minimalism",
+		path:        "theme/google",
+	},
+}
+
 type model struct {
 	step             installStep
 	tasks            []installTask
@@ -72,6 +100,7 @@ type model struct {
 	sourcePath       string
 	user             string
 	serviceName      string
+	selectedTheme    int
 }
 
 type taskCompleteMsg struct {
@@ -114,6 +143,7 @@ func newModel() model {
 		sourcePath:       defaultSourcePath,
 		user:             defaultUser,
 		serviceName:      defaultServiceName,
+		selectedTheme:    0,
 	}
 
 	return m
