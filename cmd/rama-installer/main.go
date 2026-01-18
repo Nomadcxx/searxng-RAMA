@@ -75,19 +75,19 @@ var availableThemes = []theme{
 		id:          "rama",
 		name:        "RAMA (Dark)",
 		description: "Original dark theme with space cadet blue and RAMA red accents",
-		path:        "theme/rama",
+		path:        "rama",
 	},
 	{
 		id:          "google-light",
 		name:        "Google (Light)",
 		description: "Google-inspired light theme with refined minimalism",
-		path:        "theme/google",
+		path:        "google",
 	},
 	{
 		id:          "google-dark",
 		name:        "Google (Dark)",
 		description: "Google-inspired dark theme with refined minimalism",
-		path:        "theme/google",
+		path:        "google",
 	},
 }
 
@@ -115,7 +115,7 @@ type taskCompleteMsg struct {
 }
 
 const (
-	defaultSourcePath  = "/home/nomadx/searxng-custom"
+	defaultSourcePath  = "/opt/searxng-rama"
 	defaultInstallPath = "/opt/searxng-rama"
 	defaultUser        = "searxng"
 	defaultServiceName = "searxng-rama"
@@ -515,6 +515,14 @@ func validateSource(m *model) error {
 		}
 	}
 
+	// Validate theme files exist (warnings only, not failures)
+	for _, theme := range availableThemes {
+		themePath := filepath.Join(m.sourcePath, "searx", "static", "themes", "simple", "themes", theme.path, "definitions.less")
+		if !fileExists(themePath) {
+			fmt.Fprintf(os.Stderr, "[WARNING] Theme file not found: %s\n", themePath)
+		}
+	}
+
 	return nil
 }
 
@@ -567,7 +575,7 @@ func copySearxngFiles(m *model) error {
 func applyTheme(m *model) error {
 	selectedTheme := availableThemes[m.selectedTheme]
 
-	sourceFile := filepath.Join(m.sourcePath, selectedTheme.path, "definitions.less")
+	sourceFile := filepath.Join(m.sourcePath, "searx", "static", "themes", "simple", "themes", selectedTheme.path, "definitions.less")
 	destFile := filepath.Join(m.installPath, "searx", "static", "themes", "simple", "css", "definitions.less")
 
 	if !fileExists(sourceFile) {
