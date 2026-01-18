@@ -581,8 +581,24 @@ func applyTheme(m *model) error {
 		}
 	}
 
-	if err := copyFile(sourceFile, destFile); err != nil {
-		return fmt.Errorf("copy theme file: %w", err)
+	themeContent, err := os.ReadFile(sourceFile)
+	if err != nil {
+		return fmt.Errorf("read theme file: %w", err)
+	}
+
+	themeStr := string(themeContent)
+
+	switch selectedTheme.id {
+	case "google-light":
+		themeStr = strings.Replace(themeStr, `:root.theme-auto`, `:root.theme-light`, 1)
+		themeStr = strings.Replace(themeStr, `@media (prefers-color-scheme: dark)`, `/* @media (prefers-color-scheme: dark) */`, 1)
+	case "google-dark":
+		themeStr = strings.Replace(themeStr, `:root.theme-auto`, `:root.theme-dark`, 1)
+		themeStr = strings.Replace(themeStr, `@media (prefers-color-scheme: dark)`, `/* @media (prefers-color-scheme: dark) */`, 1)
+	}
+
+	if err := os.WriteFile(destFile, []byte(themeStr), 0o644); err != nil {
+		return fmt.Errorf("write theme file: %w", err)
 	}
 
 	fmt.Fprintf(os.Stderr, "[DEBUG] Applied theme: %s\n", selectedTheme.name)
