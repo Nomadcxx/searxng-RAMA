@@ -1,8 +1,8 @@
 # Maintainer: Nomadcxx <noovie@gmail.com>
 pkgname=searxng-rama
 _pkgname=searxng
-pkgver=r9135.8bf600c
-pkgrel=3
+pkgver=r9176.2d9f213
+pkgrel=1
 pkgdesc="SearXNG with a modern theme, secure defaults and systemd service"
 arch=('any')
 url="https://github.com/Nomadcxx/searxng-RAMA"
@@ -34,11 +34,22 @@ pkgver() {
 build() {
   cd "$srcdir/$_pkgname"
 
-  # Apply RAMA theme customizations to source
+  # Copy all available themes to source (installer will select which to apply)
+  msg2 "Copying theme files to source..."
+  mkdir -p "${srcdir}/theme"
+
+  for theme_dir in "${srcdir}/searxng-RAMA/theme"/*; do
+    if [ -d "$theme_dir" ]; then
+      theme_name=$(basename "$theme_dir")
+      cp -r "$theme_dir" "${srcdir}/theme/$theme_name"
+    fi
+  done
+
+  # Apply RAMA theme customizations to source (default for backward compatibility)
   msg2 "Applying RAMA theme customizations..."
 
   # Copy RAMA definitions.less to client source (this is where theme is built from)
-  cp "${srcdir}/searxng-RAMA/theme/rama/definitions.less" "client/simple/src/less/definitions.less"
+  cp "${srcdir}/theme/rama/definitions.less" "client/simple/src/less/definitions.less"
 
   # Copy RAMA branding assets to client source BEFORE building (vite generates assets from these)
   msg2 "Installing RAMA branding assets to client source..."
@@ -97,6 +108,11 @@ EOF
   if [ -f "${srcdir}/searxng-RAMA/assets/empty_favicon.svg" ]; then
     cp "${srcdir}/searxng-RAMA/assets/empty_favicon.svg" "searx/static/themes/simple/img/empty_favicon.svg"
   fi
+
+  # Copy all theme definitions.less files to installation (installer will use these)
+  msg2 "Copying theme files for installer..."
+  mkdir -p "searx/static/themes/simple/themes"
+  cp -r "${srcdir}/theme"/* "searx/static/themes/simple/themes/"
 
   # Create version file
   cat > searx/version_frozen.py << EOF
