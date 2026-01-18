@@ -36,8 +36,13 @@ type installStep int
 
 const (
 	stepWelcome installStep = iota
+	stepThemeSelect
 	stepInstalling
 	stepComplete
+)
+
+const (
+	defaultThemeIndex = 0
 )
 
 type taskStatus int
@@ -143,7 +148,7 @@ func newModel() model {
 		sourcePath:       defaultSourcePath,
 		user:             defaultUser,
 		serviceName:      defaultServiceName,
-		selectedTheme:    0,
+		selectedTheme:    defaultThemeIndex,
 	}
 
 	return m
@@ -169,10 +174,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "up", "k":
 			if m.step == stepWelcome && m.selectedOption > 0 {
 				m.selectedOption--
+			} else if m.step == stepThemeSelect && m.selectedTheme > 0 {
+				m.selectedTheme--
 			}
 		case "down", "j":
 			if m.step == stepWelcome && m.selectedOption < 1 {
 				m.selectedOption++
+			} else if m.step == stepThemeSelect && m.selectedTheme < len(availableThemes)-1 {
+				m.selectedTheme++
 			}
 		case "enter":
 			if m.step == stepWelcome {
@@ -186,8 +195,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						{name: "Remove service file", description: "Removing service file", execute: removeServiceFile, status: statusPending},
 						{name: "Remove installation", description: "Removing installation files", execute: removeInstallation, status: statusPending},
 					}
+					m.step = stepInstalling
+					m.currentTaskIndex = 0
+					m.tasks[0].status = statusRunning
+					return m, tea.Batch(
+						m.spinner.Tick,
+						executeTask(0, &m),
+					)
+				} else {
+					m.step = stepThemeSelect
+					return m, nil
 				}
-
+			} else if m.step == stepThemeSelect {
 				m.step = stepInstalling
 				m.currentTaskIndex = 0
 				m.tasks[0].status = statusRunning
@@ -197,6 +216,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			} else if m.step == stepComplete {
 				return m, tea.Quit
+			}
+		case "esc":
+			if m.step == stepThemeSelect {
+				m.step = stepWelcome
+				return m, nil
 			}
 		}
 
@@ -265,7 +289,9 @@ func (m model) View() string {
 		Bold(true).
 		Align(lipgloss.Center)
 	title := "SearXNG Installer : RAMA Edition"
-	if m.uninstallMode {
+	if m.step == stepThemeSelect {
+		title = "SearXNG Installer : Select Theme"
+	} else if m.uninstallMode {
 		title = "SearXNG Uninstaller : RAMA Edition"
 	}
 	content.WriteString(titleStyle.Render(title))
@@ -276,6 +302,8 @@ func (m model) View() string {
 	switch m.step {
 	case stepWelcome:
 		mainContent = m.renderWelcome()
+	case stepThemeSelect:
+		mainContent = m.renderThemeSelect()
 	case stepInstalling:
 		mainContent = m.renderInstalling()
 	case stepComplete:
@@ -332,6 +360,28 @@ func (m model) renderWelcome() string {
 	b.WriteString(uninstallPrefix + "Uninstall SearXNG (RAMA Edition)\n\n")
 
 	b.WriteString(lipgloss.NewStyle().Foreground(FgMuted).Render("Requires root privileges"))
+
+	return b.String()
+}
+
+func (m model) renderThemeSelect() string {
+	var b strings.Builder
+
+	b.WriteString("Select a theme:\n\n")
+
+	for i, theme := range availableThemes {
+		prefix := "  "
+		if m.selectedTheme == i {
+			prefix = lipgloss.NewStyle().Foreground(Accent).Render("▸ ")
+		}
+
+		b.WriteString(prefix + theme.name + "\n")
+		b.WriteString(lipgloss.NewStyle().Foreground(FgMuted).Render("    "+theme.description) + "\n")
+
+		if i < len(availableThemes)-1 {
+			b.WriteString("\n")
+		}
+	}
 
 	return b.String()
 }
@@ -411,6 +461,8 @@ func (m model) getHelpText() string {
 	switch m.step {
 	case stepWelcome:
 		return "↑/↓: Navigate  •  Enter: Continue  •  Ctrl+C: Quit"
+	case stepThemeSelect:
+		return "↑/↓: Navigate  •  Enter: Select theme & continue  •  Esc: Back  •  Ctrl+C: Quit"
 	case stepComplete:
 		return "Enter: Exit  •  Ctrl+C: Quit"
 	default:
