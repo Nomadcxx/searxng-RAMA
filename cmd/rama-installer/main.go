@@ -132,6 +132,7 @@ func newModel() model {
 		{name: "Create install directory", description: "Creating installation directory", execute: createInstallDir, status: statusPending},
 		{name: "Copy SearXNG files", description: "Copying SearXNG files", execute: copySearxngFiles, status: statusPending},
 		{name: "Setup Python venv", description: "Creating venv and installing dependencies", execute: installPythonDeps, status: statusPending},
+		{name: "Apply theme", description: "Applying selected theme", execute: applyTheme, status: statusPending},
 		{name: "Setup configuration", description: "Setting up configuration", execute: setupConfiguration, status: statusPending},
 		{name: "Set permissions", description: "Setting permissions", execute: setPermissions, status: statusPending},
 		{name: "Create systemd service", description: "Creating systemd service", execute: createSystemdService, status: statusPending},
@@ -559,6 +560,32 @@ func copySearxngFiles(m *model) error {
 			}
 		}
 	}
+
+	return nil
+}
+
+func applyTheme(m *model) error {
+	selectedTheme := availableThemes[m.selectedTheme]
+
+	sourceFile := filepath.Join(m.sourcePath, selectedTheme.path, "definitions.less")
+	destFile := filepath.Join(m.installPath, "searx", "static", "themes", "simple", "css", "definitions.less")
+
+	if !fileExists(sourceFile) {
+		return fmt.Errorf("theme file not found: %s", sourceFile)
+	}
+
+	destDir := filepath.Dir(destFile)
+	if !dirExists(destDir) {
+		if err := os.MkdirAll(destDir, 0o755); err != nil {
+			return fmt.Errorf("create destination directory: %w", err)
+		}
+	}
+
+	if err := copyFile(sourceFile, destFile); err != nil {
+		return fmt.Errorf("copy theme file: %w", err)
+	}
+
+	fmt.Fprintf(os.Stderr, "[DEBUG] Applied theme: %s\n", selectedTheme.name)
 
 	return nil
 }
