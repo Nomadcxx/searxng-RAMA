@@ -100,7 +100,8 @@ type model struct {
 	spinner          spinner.Model
 	errors           []string
 	uninstallMode    bool
-	selectedOption   int // 0 = Install, 1 = Uninstall
+	switchThemeMode  bool
+	selectedOption   int // 0 = Install, 1 = Switch Theme, 2 = Uninstall
 	installPath      string
 	sourcePath       string
 	user             string
@@ -179,16 +180,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.selectedTheme--
 			}
 		case "down", "j":
-			if m.step == stepWelcome && m.selectedOption < 1 {
+			if m.step == stepWelcome && m.selectedOption < 2 {
 				m.selectedOption++
 			} else if m.step == stepThemeSelect && m.selectedTheme < len(availableThemes)-1 {
 				m.selectedTheme++
 			}
 		case "enter":
 			if m.step == stepWelcome {
-				m.uninstallMode = (m.selectedOption == 1)
-
-				if m.uninstallMode {
+				if m.selectedOption == 2 {
+					// Uninstall mode
+					m.uninstallMode = true
 					m.tasks = []installTask{
 						{name: "Check privileges", description: "Checking root access", execute: checkPrivileges, status: statusPending},
 						{name: "Stop service", description: "Stopping SearXNG service", execute: stopService, status: statusPending},
@@ -203,11 +204,42 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.spinner.Tick,
 						executeTask(0, &m),
 					)
+				} else if m.selectedOption == 1 {
+					// Theme switching mode - minimal tasks
+					m.switchThemeMode = true
+					m.step = stepThemeSelect
+					return m, nil
 				} else {
+					// Regular install
+					m.switchThemeMode = false
 					m.step = stepThemeSelect
 					return m, nil
 				}
 			} else if m.step == stepThemeSelect {
+				// Create appropriate task list based on mode
+				if m.switchThemeMode {
+					// Minimal tasks for theme switching
+					m.tasks = []installTask{
+						{name: "Check privileges", description: "Checking root access", execute: checkPrivileges, status: statusPending},
+						{name: "Stop service", description: "Stopping SearXNG service", execute: stopService, status: statusPending},
+						{name: "Apply theme", description: "Applying selected theme", execute: applyTheme, status: statusPending},
+						{name: "Start service", description: "Starting SearXNG service", execute: enableAndStartService, status: statusPending},
+					}
+				} else {
+					// Full install tasks (already set in newModel)
+					m.tasks = []installTask{
+						{name: "Check privileges", description: "Checking root access", execute: checkPrivileges, status: statusPending},
+						{name: "Validate source", description: "Validating SearXNG source", execute: validateSource, status: statusPending},
+						{name: "Create install directory", description: "Creating installation directory", execute: createInstallDir, status: statusPending},
+						{name: "Copy SearXNG files", description: "Copying SearXNG files", execute: copySearxngFiles, status: statusPending},
+						{name: "Setup Python venv", description: "Creating venv and installing dependencies", execute: installPythonDeps, status: statusPending},
+						{name: "Apply theme", description: "Applying selected theme", execute: applyTheme, status: statusPending},
+						{name: "Setup configuration", description: "Setting up configuration", execute: setupConfiguration, status: statusPending},
+						{name: "Set permissions", description: "Setting permissions", execute: setPermissions, status: statusPending},
+						{name: "Create systemd service", description: "Creating systemd service", execute: createSystemdService, status: statusPending},
+						{name: "Enable and start service", description: "Enabling and starting RAMA SearXNG service", execute: enableAndStartService, status: statusPending},
+					}
+				}
 				m.step = stepInstalling
 				m.currentTaskIndex = 0
 				m.tasks[0].status = statusRunning
@@ -292,6 +324,8 @@ func (m model) View() string {
 	title := "SearXNG Installer : RAMA Edition"
 	if m.step == stepThemeSelect {
 		title = "SearXNG Installer : Select Theme"
+	} else if m.switchThemeMode {
+		title = "SearXNG Theme Switcher : RAMA Edition"
 	} else if m.uninstallMode {
 		title = "SearXNG Uninstaller : RAMA Edition"
 	}
@@ -353,9 +387,16 @@ func (m model) renderWelcome() string {
 	}
 	b.WriteString(installPrefix + "Install SearXNG (RAMA Edition)\n\n")
 
+	// Switch theme option
+	themePrefix := "  "
+	if m.selectedOption == 1 {
+		themePrefix = lipgloss.NewStyle().Foreground(Accent).Render("▸ ")
+	}
+	b.WriteString(themePrefix + "Switch Theme\n\n")
+
 	// Uninstall option
 	uninstallPrefix := "  "
-	if m.selectedOption == 1 {
+	if m.selectedOption == 2 {
 		uninstallPrefix = lipgloss.NewStyle().Foreground(Accent).Render("▸ ")
 	}
 	b.WriteString(uninstallPrefix + "Uninstall SearXNG (RAMA Edition)\n\n")
@@ -445,6 +486,18 @@ Press Enter to exit`
 
 	selectedTheme := availableThemes[m.selectedTheme]
 
+	if m.switchThemeMode {
+		return fmt.Sprintf(`Theme switched successfully!
+
+New theme: %s
+Service restarted automatically.
+
+Access RAMA Search at http://localhost:8855
+
+Press Enter to exit`,
+			selectedTheme.name)
+	}
+
 	return fmt.Sprintf(`Installation complete!
 
 Installation directory: %s
@@ -473,6 +526,9 @@ func (m model) getHelpText() string {
 	case stepWelcome:
 		return "↑/↓: Navigate  •  Enter: Continue  •  Ctrl+C: Quit"
 	case stepThemeSelect:
+		if m.switchThemeMode {
+			return "↑/↓: Navigate  •  Enter: Select theme & apply  •  Esc: Back  •  Ctrl+C: Quit"
+		}
 		return "↑/↓: Navigate  •  Enter: Select theme & continue  •  Esc: Back  •  Ctrl+C: Quit"
 	case stepComplete:
 		return "Enter: Exit  •  Ctrl+C: Quit"
