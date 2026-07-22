@@ -44,6 +44,9 @@ build() {
       cp -r "$theme_dir" "${srcdir}/theme/$theme_name"
     fi
   done
+  # gen-variant.py is a top-level file (the loop above copies only theme dirs) —
+  # copy it explicitly; the variant pre-build below invokes it.
+  cp "${srcdir}/searxng-RAMA/theme/gen-variant.py" "${srcdir}/theme/gen-variant.py"
 
   # Apply RAMA theme customizations to source (default for backward compatibility)
   msg2 "Applying RAMA theme customizations..."
