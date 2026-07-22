@@ -23,7 +23,7 @@ install=${pkgname}.install
 _giturl="https://github.com/searxng/searxng"
 _gitbranch="master"
 source=(git+$_giturl#branch=$_gitbranch
-        git+file:///tmp/searxng-RAMA.git)
+        git+https://github.com/Nomadcxx/searxng-RAMA.git)
 b2sums=('SKIP' 'SKIP')
 
 pkgver() {
