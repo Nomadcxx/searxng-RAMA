@@ -29,12 +29,12 @@ install_deps() {
     export DEBIAN_FRONTEND=noninteractive
     apt-get update -qq
     apt-get install -y --no-install-recommends \
-      git curl ca-certificates python3 python3-venv python3-dev \
+      git curl ca-certificates xz-utils python3 python3-venv python3-dev \
       nodejs npm openssl gcc make libffi-dev golang-go
   elif command -v dnf >/dev/null 2>&1; then
     echo "Detected dnf (Fedora) — installing dependencies..."
     dnf install -y \
-      git curl ca-certificates python3 python3-virtualenv python3-devel \
+      git curl ca-certificates xz python3 python3-virtualenv python3-devel \
       nodejs npm openssl gcc make libffi-devel golang
   else
     echo "Unsupported distribution: need apt (Debian/Ubuntu) or dnf (Fedora)." >&2
@@ -70,8 +70,36 @@ ensure_go() {
   export PATH="/usr/local/go/bin:$PATH"
 }
 
+# SearXNG's build toolchain (rolldown/vite) needs Node >= 20.12 (uses
+# node:util styleText). Debian/Ubuntu ship Node 18 — install an official Node 20
+# tarball to /usr/local/node when the distro's is too old or missing.
+ensure_node() {
+  local cur=0
+  if command -v node >/dev/null 2>&1; then
+    cur=$(node --version | sed -nE 's/^v([0-9]+).*/\1/p' || echo 0)
+  fi
+  if [ "${cur:-0}" -ge 20 ] 2>/dev/null; then
+    return 0
+  fi
+  echo "Node.js missing or older than 20 — installing an official Node runtime..."
+  local arch; arch=$(uname -m)
+  case "$arch" in
+    x86_64) arch=x64 ;;
+    aarch64|arm64) arch=arm64 ;;
+    *) echo "Error: unsupported architecture '$arch' for the Node tarball." >&2; exit 1 ;;
+  esac
+  local ver="v20.18.1"
+  curl -fsSL "https://nodejs.org/dist/${ver}/node-${ver}-linux-${arch}.tar.xz" -o /tmp/node.tar.xz
+  rm -rf /usr/local/node
+  mkdir -p /usr/local/node
+  tar -C /usr/local/node --strip-components=1 -xJf /tmp/node.tar.xz
+  rm -f /tmp/node.tar.xz
+  export PATH="/usr/local/node/bin:$PATH"
+}
+
 install_deps
 ensure_go
+ensure_node
 export GOTOOLCHAIN=auto
 
 for t in git curl go python3 node npm openssl; do
