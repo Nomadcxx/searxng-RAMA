@@ -1,7 +1,7 @@
 # Maintainer: Nomadcxx <noovie@gmail.com>
 pkgname=searxng-rama
 _pkgname=searxng
-pkgver=r9176.2d9f213
+pkgver=r9624.6da6eee
 pkgrel=1
 pkgdesc="SearXNG with a modern theme, secure defaults and systemd service"
 arch=('any')
@@ -23,7 +23,7 @@ install=${pkgname}.install
 _giturl="https://github.com/searxng/searxng"
 _gitbranch="master"
 source=(git+$_giturl#branch=$_gitbranch
-        git+https://github.com/Nomadcxx/searxng-RAMA.git)
+        git+file:///home/nomadx/searxng-RAMA)
 b2sums=('SKIP' 'SKIP')
 
 pkgver() {
@@ -50,6 +50,22 @@ build() {
 
   # Copy RAMA definitions.less to client source (this is where theme is built from)
   cp "${srcdir}/theme/rama/definitions.less" "client/simple/src/less/definitions.less"
+
+  # Copy RAMA LESS override layer (rama.less + fonts.less) into the theme directory
+  mkdir -p "client/simple/src/less/themes/rama"
+  cp "${srcdir}/theme/rama/rama.less" "client/simple/src/less/themes/rama/rama.less"
+  cp "${srcdir}/theme/rama/fonts.less" "client/simple/src/less/themes/rama/fonts.less"
+
+  # Copy self-hosted woff2 fonts into the static tree (served at /static/themes/simple/fonts/)
+  mkdir -p "searx/static/themes/simple/fonts"
+  cp "${srcdir}/theme/rama/fonts/"*.woff2 "searx/static/themes/simple/fonts/"
+
+  # Append the rama.less import as the LAST entry in style.less so it wins the cascade
+  echo '@import "themes/rama/rama.less";' >> "client/simple/src/less/style.less"
+
+  # Copy RAMA template forks (index.html hero + results.html sticky header) over the simple theme
+  cp "${srcdir}/theme/rama/templates/index.html" "searx/templates/simple/index.html"
+  cp "${srcdir}/theme/rama/templates/results.html" "searx/templates/simple/results.html"
 
   # Copy RAMA branding assets to client source BEFORE building (vite generates assets from these)
   msg2 "Installing RAMA branding assets to client source..."
