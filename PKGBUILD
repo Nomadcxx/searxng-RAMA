@@ -93,7 +93,33 @@ EOF
   npm install --no-audit --no-fund --ignore-scripts
 
   # Build only the vite part (CSS compilation) - skip icons which needs sharp
+  # This first build is the RAMA (default) variant.
   npx vite build
+
+  # --- Pre-build theme variants for runtime theme-switching ---
+  # Each switchable variant is a self-contained CSS bundle; the theme switcher
+  # swaps which bundle is served (see cmd/rama-installer applyTheme). vite's
+  # emptyOutDir wipes the output dir on every build, so stash each variant's CSS
+  # OUTSIDE that dir and copy them all back after the final build.
+  msg2 "Pre-building theme variants (rama, google-light, google-dark)..."
+  _cssdir="$srcdir/$_pkgname/searx/static/themes/simple"
+  _variantcss="$srcdir/variant-css"
+  mkdir -p "$_variantcss"
+  cp "$_cssdir/sxng-ltr.min.css" "$_variantcss/sxng-ltr.rama.min.css"
+  cp "$_cssdir/sxng-rtl.min.css" "$_variantcss/sxng-rtl.rama.min.css"
+
+  for _variant in google-light google-dark; do
+    _which="${_variant#google-}"
+    python "${srcdir}/theme/gen-variant.py" "${srcdir}/theme/google/definitions.less" "$_which" > "src/less/definitions.less"
+    npx vite build
+    cp "$_cssdir/sxng-ltr.min.css" "$_variantcss/sxng-ltr.${_variant}.min.css"
+    cp "$_cssdir/sxng-rtl.min.css" "$_variantcss/sxng-rtl.${_variant}.min.css"
+  done
+
+  # Publish every variant bundle, then restore RAMA as the default served files.
+  cp "$_variantcss/"*.min.css "$_cssdir/"
+  cp "$_variantcss/sxng-ltr.rama.min.css" "$_cssdir/sxng-ltr.min.css"
+  cp "$_variantcss/sxng-rtl.rama.min.css" "$_cssdir/sxng-rtl.min.css"
 
   cd "$srcdir/$_pkgname"
 
@@ -126,10 +152,10 @@ EOF
     cp "${srcdir}/searxng-RAMA/assets/empty_favicon.svg" "searx/static/themes/simple/img/empty_favicon.svg"
   fi
 
-  # Copy all theme definitions.less files to installation (installer will use these)
-  msg2 "Copying theme files for installer..."
-  mkdir -p "searx/static/themes/simple/themes"
-  cp -r "${srcdir}/theme"/* "searx/static/themes/simple/themes/"
+  # NOTE: the theme-build steps above mirror scripts/build-themes.sh (used by the
+  # cross-distro install.sh). Keep the two in sync. Theme switching now swaps the
+  # pre-built sxng-<side>.<variant>.min.css bundles produced above — the old
+  # themes/<name>/definitions.less copy is obsolete and intentionally removed.
 
   # Create version file
   cat > searx/version_frozen.py << EOF
@@ -175,16 +201,15 @@ package() {
 
   # RAMA assets already copied to source in build() and compiled by vite
 
-  # Modify settings (verify each placeholder exists before replacing)
+  # Modify STATIC settings only (verify each placeholder exists before replacing).
+  # The secret_key is intentionally NOT set here — generating it at package time
+  # would bake one shared key into the package (in a backup= file). It is generated
+  # per-machine in post_install() (see searxng-rama.install); the "ultrasecretkey"
+  # placeholder is shipped as-is and replaced on the user's system.
   msg2 "Configuring settings..."
   local settings_file="${pkgdir}/opt/searxng-rama/searx/settings.yml"
 
-  # Generate secret key
-  local secret_key="$(openssl rand -hex 32)"
-
-  # Modify settings — fail early if upstream changed a placeholder
   grep -q 'secret_key: "ultrasecretkey"' "$settings_file" || { echo "ERROR: secret_key placeholder not found"; exit 1; }
-  sed -i "s/secret_key: \"ultrasecretkey\"/secret_key: \"${secret_key}\"/" "$settings_file"
   grep -q 'port: 8888' "$settings_file" || { echo "ERROR: port placeholder not found"; exit 1; }
   sed -i "s/port: 8888/port: 8855/" "$settings_file"
   grep -q 'bind_address: "127.0.0.1"' "$settings_file" || { echo "ERROR: bind_address placeholder not found"; exit 1; }
