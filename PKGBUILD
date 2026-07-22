@@ -57,7 +57,8 @@ build() {
   cp "${srcdir}/theme/rama/fonts.less" "client/simple/src/less/themes/rama/fonts.less"
 
   # Append the rama.less import as the LAST entry in style.less so it wins the cascade
-  echo '@import "themes/rama/rama.less";' >> "client/simple/src/less/style.less"
+  grep -q 'themes/rama/rama.less' "client/simple/src/less/style.less" || \
+    echo '@import "themes/rama/rama.less";' >> "client/simple/src/less/style.less"
 
   # Copy RAMA branding assets to client source BEFORE building (vite generates assets from these)
   msg2 "Installing RAMA branding assets to client source..."
@@ -174,17 +175,21 @@ package() {
 
   # RAMA assets already copied to source in build() and compiled by vite
 
-  # Modify settings.yml with RAMA defaults
+  # Modify settings (verify each placeholder exists before replacing)
   msg2 "Configuring settings..."
   local settings_file="${pkgdir}/opt/searxng-rama/searx/settings.yml"
 
   # Generate secret key
   local secret_key="$(openssl rand -hex 32)"
 
-  # Modify settings
+  # Modify settings — fail early if upstream changed a placeholder
+  grep -q 'secret_key: "ultrasecretkey"' "$settings_file" || { echo "ERROR: secret_key placeholder not found"; exit 1; }
   sed -i "s/secret_key: \"ultrasecretkey\"/secret_key: \"${secret_key}\"/" "$settings_file"
+  grep -q 'port: 8888' "$settings_file" || { echo "ERROR: port placeholder not found"; exit 1; }
   sed -i "s/port: 8888/port: 8855/" "$settings_file"
+  grep -q 'bind_address: "127.0.0.1"' "$settings_file" || { echo "ERROR: bind_address placeholder not found"; exit 1; }
   sed -i 's/bind_address: "127.0.0.1"/bind_address: "0.0.0.0"/' "$settings_file"
+  grep -q 'instance_name: "SearXNG"' "$settings_file" || { echo "ERROR: instance_name placeholder not found"; exit 1; }
   sed -i 's/instance_name: "SearXNG"/instance_name: "SearXNG RAMA Edition"/' "$settings_file"
 
   # Create Python virtual environment
