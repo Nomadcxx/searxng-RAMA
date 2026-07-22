@@ -6,6 +6,23 @@
 
 ---
 
+## 0. Implementation status (2026-07-23) — on branch `dev`, E2E-tested, not yet pushed
+
+**Done + verified end-to-end on this Arch host:**
+- **Theme redesign** (RAMA + Google light/dark) — unified layout, per-theme palettes; 39-check WCAG gate passes.
+- **Theme-switch (A1)** — pre-built CSS variant per theme (`gen-variant.py` + `scripts/build-themes.sh`), swapped by the installer. **Works live** (verified: switching flips the served bundle).
+- **Cross-distro installer (A2/A3)** — `install.sh` for Debian/Ubuntu + Fedora (distro deps, Go floor, NodeSource Node 20). Theme build verified on Debian 12, Ubuntu 24.04, Fedora 40.
+- **Code nits (D1-D4)** — done in `main.go`.
+- **Packaging hygiene** — secret key moved to `post_install` (per-machine, verified unique in a real install); `post_upgrade` venv-rebuild guard.
+
+**E2E results:** Layer 1 AUR `makepkg` ✅ (contents verified) · Layer 2 render + live switch + `post_install` key ✅ · Layer 3 cross-distro build ✅ (Debian/Ubuntu/Fedora) · Layer 4 systemd service start — pending (nspawn or maintainer local).
+
+**Bugs E2E caught & fixed:** `gen-variant.py` not copied into `$srcdir` (theme loop copies dirs only); Node floor (Debian ships 18); nodejs.org tarball npm skips rolldown's native binding → use NodeSource.
+
+**Open:** ship `rama-installer` in the AUR package so AUR users can reach Switch-Theme/Uninstall (currently only the cross-distro path builds it). Then: push `dev`, regen `.SRCINFO`, merge to `main`, AUR push.
+
+---
+
 ## 1. Locked decisions
 
 | # | Decision | Rationale |
