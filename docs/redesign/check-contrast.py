@@ -30,33 +30,43 @@ def ratio(a, b):
     return (hi + 0.05) / (lo + 0.05)
 
 
-# ---- locked RAMA dark palette (docs/plan-of-record §7) ----
-GROUND, SURFACE, SURFACE2 = "#1e2030", "#282a3b", "#313349"
-INK, MUTED, FAINT = "#eef2f6", "#aab4c5", "#8d99ae"
-ACCENT, ACCENT_FILL, ACCENT_FILL2 = "#ff7282", "#e11235", "#c30a29"
-OK, WARN, ERROR_BG = "#5fd08a", "#e6c15a", "#c30a29"
 WHITE = "#ffffff"
 
-# (label, fg, bg, minimum-ratio)
-CHECKS = [
-    ("body ink / ground",               INK,    GROUND,       4.5),
-    ("body ink / surface",              INK,    SURFACE,      4.5),
-    ("result title (hover) / surface",   ACCENT, SURFACE,      4.5),
-    ("result title (hover) / ground",    ACCENT, GROUND,       4.5),
-    ("url + meta muted / surface",       MUTED,  SURFACE,      4.5),
-    ("url + meta muted / ground",        MUTED,  GROUND,       4.5),
-    ("engine badge muted / surface2",    MUTED,  SURFACE2,     4.5),
-    ("CTA label white / accent-fill",    WHITE,  ACCENT_FILL,  4.5),
-    ("CTA label white / accent-fill-2",  WHITE,  ACCENT_FILL2, 4.5),
-    ("faint text / ground",              FAINT,  GROUND,       4.5),
-    ("faint text / surface",             FAINT,  SURFACE,      4.5),
-    ("accent / surface-2",              ACCENT, SURFACE2,     4.5),
-    ("success text / surface",           OK,     SURFACE,      4.5),
-    ("success text / ground",            OK,     GROUND,       4.5),
-    ("warning text / surface",            WARN,   SURFACE,      4.5),
-    ("warning text / ground",             WARN,   GROUND,       4.5),
-    ("error text (white) / error-bg",    WHITE,  ERROR_BG,     4.5),
-]
+
+def palette_checks(name, p):
+    """Standard text/surface pairs every theme variant must clear at AA (4.5)."""
+    g, s, s2 = p["ground"], p["surface"], p["surface2"]
+    return [
+        (f"{name}: ink / ground",          p["ink"],   g,  4.5),
+        (f"{name}: ink / surface",         p["ink"],   s,  4.5),
+        (f"{name}: title-hover / surface", p["accent"], s, 4.5),
+        (f"{name}: title-hover / ground",  p["accent"], g, 4.5),
+        (f"{name}: muted / surface",       p["muted"], s,  4.5),
+        (f"{name}: muted / ground",        p["muted"], g,  4.5),
+        (f"{name}: engine badge / surf-2", p["muted"], s2, 4.5),
+        (f"{name}: faint / ground",        p["faint"], g,  4.5),
+        (f"{name}: faint / surface",       p["faint"], s,  4.5),
+        (f"{name}: CTA white / fill",      WHITE, p["fill"],  4.5),
+        (f"{name}: CTA white / fill-2",    WHITE, p["fill2"], 4.5),
+        (f"{name}: success / surface",     p["ok"],   s,  4.5),
+        (f"{name}: warning / surface",     p["warn"], s,  4.5),
+    ]
+
+
+# ---- one palette per switchable variant (docs/plan-of-record §7) ----
+RAMA = dict(ground="#1e2030", surface="#282a3b", surface2="#313349",
+            ink="#eef2f6", muted="#aab4c5", faint="#8d99ae",
+            accent="#ff7282", fill="#e11235", fill2="#c30a29", ok="#5fd08a", warn="#e6c15a")
+GOOGLE_LIGHT = dict(ground="#ffffff", surface="#ffffff", surface2="#f1f3f4",
+                    ink="#202124", muted="#5f6368", faint="#6a6f74",
+                    accent="#1a0dab", fill="#e11235", fill2="#c30a29", ok="#0d652d", warn="#b06000")
+GOOGLE_DARK = dict(ground="#202124", surface="#303134", surface2="#3c3d40",
+                   ink="#e8eaed", muted="#a8aeb4", faint="#979da3",
+                   accent="#8ab4f8", fill="#e11235", fill2="#c30a29", ok="#81c995", warn="#fdd663")
+
+CHECKS = (palette_checks("rama", RAMA)
+          + palette_checks("google-light", GOOGLE_LIGHT)
+          + palette_checks("google-dark", GOOGLE_DARK))
 
 fails = []
 print(f"{'ratio':>6}  {'target':>6}  result  pair")

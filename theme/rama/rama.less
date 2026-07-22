@@ -1,20 +1,10 @@
-/* RAMA redesign override layer — imported last so it wins the cascade.
-   Dual token system: definitions.less maps upstream --color-* names to
-   these semantic tokens. Edit --ground/--surface/--ink here, not in
-   definitions.less — the upstream names are aliases. */
+/* RAMA redesign layout layer — THEME-NEUTRAL, imported last so it wins the cascade.
+   The colour PALETTE (--ground/--surface/--accent/…) is defined per-theme in each
+   theme's definitions.less, so this same layer themes rama, google-light and
+   google-dark. Only structural tokens (fonts, spacing, radius, motion) live here. */
 @import "./fonts.less";
 
 :root{
-  color-scheme: dark;
-  --ground:#1e2030; --ground-2:#191b28;
-  --surface:#282a3b; --surface-2:#313349; --surface-3:#3a3c54;
-  --ink:#eef2f6; --muted:#aab4c5; --faint:#8d99ae;
-  --accent:#ff7282;          /* interactive text / hover / underline */
-  --accent-fill:#e11235;     /* brand red — CTA/pill fills (white label 4.84:1) */
-  --accent-fill-2:#c30a29;   /* active / gradient bottom (white label 6.18:1) */
-  --ok:#5fd08a; --warn:#e6c15a;
-  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
-  --glow:rgba(239,35,60,.16);
   --font-ui:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Menlo,monospace;
   --sp-1:.25rem; --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem; --sp-5:1.5rem; --sp-6:2rem; --sp-8:3rem; --sp-10:4.5rem;
