@@ -154,11 +154,41 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .search_filters select{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);color:var(--muted);font-family:var(--font-mono);font-size:.78rem;padding:.25rem .5rem}
 
 /* result rows — real classes: article.result .url_header .url_wrapper h3 .content .engines */
-#urls{display:flex;flex-direction:column;gap:var(--sp-2)}
+/* results shell — centred Workbench rail + side panel, replacing upstream's
+   fixed `#results{margin-left:10rem}`. Tabs/filters align to the same rail. */
+#results{
+  max-width:1180px;margin:0 auto;padding:var(--sp-5) var(--sp-5) var(--sp-10);
+  display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:var(--sp-8);align-items:start;
+}
+.appbar-tabs #categories,.search_filters{max-width:1180px;margin-inline:auto;width:100%}
+/* rail and panel both start at the top row — otherwise an empty answers/corrections
+   slot takes row 1 and pushes the results column down. */
+#results>#urls{grid-column:1;grid-row:1}
+#results>#sidebar{grid-column:2;grid-row:1}
+
+#urls{display:flex;flex-direction:column;gap:var(--sp-2);min-width:0}
+
+/* ONE LEFT EDGE (design.md non-negotiable #2). Upstream floats a.thumbnail_link
+   left, so the snippet wraps underneath the image and the column goes ragged.
+   Grid instead: every text element shares column 1; media sits in column 2 and
+   text never wraps around it. Explicit rows let the media span the row block. */
 .result{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto auto auto auto;
+  column-gap:var(--sp-4);
   padding:var(--sp-4);border-radius:var(--r-md);border:1px solid transparent;
   transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),transform var(--dur) var(--ease);
 }
+.result>*{grid-column:1;min-width:0}
+.result>.thumbnail_link{grid-column:2;grid-row:1/-1;align-self:start;float:none;margin:0}
+/* Match upstream's `.result a.thumbnail_link img.thumbnail` specificity so our
+   fixed box wins (it sets height:unset). A thumbnail that fails to load must not
+   collapse to zero height and shift the row. */
+.result a.thumbnail_link img.thumbnail{
+  width:104px;height:104px;max-width:none;object-fit:cover;
+  border-radius:var(--r-sm);display:block;margin:0;background:var(--surface-2)}
+.result .break{display:none} /* upstream float clearfix — an empty grid row here */
 .result:hover{background:var(--surface);border-color:var(--line);transform:translateY(-1px)}
 .url_header{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem}
 .favicon{width:18px;height:18px;border-radius:5px;background:var(--surface-2);display:grid;place-items:center;flex:0 0 auto;font-family:var(--font-mono);font-size:10px;color:var(--muted)}
@@ -169,22 +199,33 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .result h3 a{color:var(--ink);transition:color var(--dur) var(--ease);text-decoration-color:transparent;text-underline-offset:3px}
 .result:hover h3 a,.result h3 a:hover{color:var(--accent);text-decoration:underline;text-decoration-color:var(--accent)}
 .result .content{margin:0;color:var(--muted);font-size:.92rem;max-width:var(--measure)}
-.result .engines{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem;align-items:center}
+/* meta line sits with its result, left-aligned (upstream floats it right) */
+.result .engines{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem;align-items:center;float:none;justify-content:flex-start}
 .result .engines span{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.02em;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);padding:.1rem .45rem;border-radius:var(--r-sm)}
 .result .cache_link{color:var(--faint);font-family:var(--font-mono);font-size:.68rem;margin-left:.2rem}
 .result .cache_link:hover{color:var(--accent)}
 
-/* sidebar — real ids: #sidebar #infoboxes */
-#sidebar{display:flex;flex-direction:column;gap:var(--sp-4)}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4)}
-.card .title{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 .75rem}
-.infobox h4{margin:.2rem 0 .5rem;font-size:1.05rem}
-.infobox p{margin:0 0 .6rem;color:var(--muted);font-size:.88rem}
-.infobox .attr{display:flex;justify-content:space-between;gap:1rem;padding:.4rem 0;border-top:1px solid var(--line);font-size:.85rem}
-.infobox .attr span:first-child{color:var(--faint)}
-.suggestions .chips{display:flex;flex-wrap:wrap;gap:.4rem}
-.suggestions .chips a{font-size:.82rem;color:var(--accent);border:1px solid var(--line);padding:.25rem .6rem;border-radius:var(--r-pill);transition:all var(--dur) var(--ease)}
-.suggestions .chips a:hover{background:color-mix(in srgb,var(--accent-fill) 12%,var(--surface));border-color:var(--accent)}
+/* side panel — REAL markup: #sidebar > #result_count, #infoboxes
+   (details.sidebar-collapsible > summary.title), #suggestions, #search_url … */
+#sidebar{display:flex;flex-direction:column;gap:var(--sp-4);min-width:0;margin:0;padding:0}
+#sidebar>*{margin:0}
+#sidebar #result_count{font-family:var(--font-mono);font-size:.72rem;color:var(--faint)}
+/* panel styling on the TOP level only — #infoboxes wraps a <details>, so styling
+   both nests one bordered box inside another. */
+#sidebar>#infoboxes,#sidebar>#suggestions,#sidebar>#search_url,#sidebar>#apis,#sidebar>details{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4)}
+#sidebar #infoboxes details,#sidebar #infoboxes .infobox{background:none;border:0;padding:0;margin:0}
+#sidebar summary{
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);cursor:pointer;list-style:none;margin:0 0 .5rem}
+#sidebar summary::-webkit-details-marker{display:none}
+#sidebar .infobox img{max-width:100%;height:auto;border-radius:var(--r-sm)}
+#sidebar .infobox h1,#sidebar .infobox h2,#sidebar .infobox h3,#sidebar .infobox h4{
+  margin:.2rem 0 .5rem;font-size:1.05rem;color:var(--ink);font-weight:600}
+#sidebar p{margin:0 0 .6rem;color:var(--muted);font-size:.88rem}
+#sidebar a{color:var(--accent)}
+#sidebar table{width:100%;border-collapse:collapse;font-size:.85rem}
+#sidebar td,#sidebar th{padding:.35rem 0;border-top:1px solid var(--line);text-align:left;color:var(--muted);font-weight:400}
 
 /* pagination — real id: #pagination .page_number */
 #pagination{display:flex;justify-content:center;gap:.35rem;margin-top:var(--sp-8);flex-wrap:wrap}
