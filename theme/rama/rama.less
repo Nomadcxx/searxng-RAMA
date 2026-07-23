@@ -26,8 +26,13 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 
 /* ================= HOME ================= */
 
+/* our design replaces the upstream top nav (#links_on_top) with the corner cog
+   on home + the rheader actions on results; kill it and any main padding so the
+   hero (and its top glow) start at the true viewport top */
+#links_on_top{display:none}
+#main_index{padding:0;margin:0}
 .home{
-  min-height:78vh;display:grid;place-items:center;padding:var(--sp-10) var(--sp-5);
+  min-height:100vh;display:grid;place-items:center;padding:var(--sp-8) var(--sp-5);
   position:relative;overflow:hidden;
   background:
     radial-gradient(58% 36% at 50% -4%, rgba(239,35,60,.11), transparent 60%),
@@ -69,28 +74,39 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   font-size:1.05rem;padding:.55rem 0;
 }
 #q::placeholder{color:var(--faint)}
-#clear_search{width:38px;height:38px;border-radius:50%;color:var(--muted);display:grid;place-items:center}
+/* real markup: #clear_search / #send_search wrap an ion-icon in a .hide_if_nojs
+   span (icon, JS on) + a .show_if_nojs text span (fallback). Size to the icon
+   only and centre it — no phantom label width. */
+#clear_search{width:40px;height:40px;border-radius:50%;color:var(--muted);display:grid;place-items:center;flex:0 0 auto;padding:0}
 #clear_search:hover{background:var(--surface-2);color:var(--ink)}
-#clear_search svg{width:16px;height:16px}
+#clear_search .hide_if_nojs{display:grid;place-items:center;line-height:0}
+#clear_search .show_if_nojs{display:none}
+#clear_search svg,#clear_search .ionicon{width:16px;height:16px}
 #send_search{
-  height:44px;padding:0 1.2rem;border-radius:var(--r-pill);
-  background:linear-gradient(160deg,var(--accent-fill),var(--accent-fill-2));color:#fff;font-weight:600;
-  display:inline-flex;align-items:center;gap:.5rem;
+  width:44px;height:44px;min-width:44px;padding:0;border-radius:var(--r-pill);flex:0 0 auto;
+  background:linear-gradient(160deg,var(--accent-fill),var(--accent-fill-2));color:#fff;
+  display:grid;place-items:center;
   box-shadow:0 4px 16px var(--glow);transition:transform var(--dur) var(--ease),filter var(--dur) var(--ease)}
 #send_search:hover{filter:brightness(1.08)}
 #send_search:active{transform:translateY(1px)}
-#send_search svg{width:18px;height:18px;stroke:#fff}
-#send_search .label{font-size:.95rem}
+#send_search .hide_if_nojs{display:grid;place-items:center;line-height:0}
+#send_search .show_if_nojs{display:none}
+#send_search svg,#send_search .ionicon{width:20px;height:20px}
 
 /* categories — real classes: .search_categories .category .category_name */
 .search_categories{display:flex;flex-wrap:wrap;gap:var(--sp-2);justify-content:center;margin-top:var(--sp-5)}
+/* real markup: .category (div) > hidden checkbox + <label> (icon + .category_name).
+   Style the div as a compact pill; the label carries the icon+name flex row. */
 .category{
-  display:inline-flex;align-items:center;gap:.45rem;padding:.5rem .9rem;border-radius:var(--r-pill);
+  padding:.32rem .72rem;border-radius:var(--r-pill);
   background:var(--surface);border:1px solid var(--line);color:var(--muted);
-  font-family:var(--font-mono);font-size:.8rem;transition:all var(--dur) var(--ease)}
-.category svg{width:15px;height:15px;stroke:currentColor}
+  font-family:var(--font-mono);font-size:.72rem;transition:all var(--dur) var(--ease)}
+.category input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.category label,.category .tooltips{display:inline-flex;align-items:center;gap:.4rem;color:inherit;cursor:pointer;margin:0}
+.category .category_name{font-family:var(--font-mono);line-height:1}
+.category svg,.category .ionicon{width:14px;height:14px;stroke:currentColor}
 .category:hover{color:var(--ink);border-color:var(--line-2);background:var(--surface-2)}
-.category.selected{color:var(--ink);border-color:var(--accent);background:color-mix(in srgb,var(--accent-fill) 14%,var(--surface))}
+.category:has(input:checked),.category.selected{color:var(--ink);border-color:var(--accent);background:color-mix(in srgb,var(--accent-fill) 14%,var(--surface))}
 .hint{margin-top:var(--sp-6);font-family:var(--font-mono);font-size:.72rem;color:var(--faint)}
 /* always-reachable settings on the home view */
 .home-settings{
