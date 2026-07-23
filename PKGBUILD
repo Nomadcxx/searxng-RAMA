@@ -270,6 +270,13 @@ ExecStart=/usr/bin/searxng-rama-run
 Restart=on-failure
 RestartSec=5
 
+# SearXNG caches its engine/data SQLite DBs in the system temp dir
+# (/tmp/sxng_cache_*.db). PrivateTmp gives the service its own isolated /tmp so
+# those DBs can't collide with (or be owned by) another user — without it the
+# service crash-loops on "attempt to write a readonly database".
+PrivateTmp=true
+NoNewPrivileges=true
+
 # Permissions for database writes
 ReadWritePaths=/opt/searxng-rama
 
