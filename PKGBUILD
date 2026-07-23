@@ -131,8 +131,7 @@ EOF
   cp "${srcdir}/theme/rama/fonts/"*.woff2 "searx/static/themes/simple/fonts/"
 
   # Copy RAMA template forks (index.html hero + results.html sticky header) over the simple theme
-  cp "${srcdir}/theme/rama/templates/index.html" "searx/templates/simple/index.html"
-  cp "${srcdir}/theme/rama/templates/results.html" "searx/templates/simple/results.html"
+  cp "${srcdir}/theme/rama/templates/"*.html "searx/templates/simple/"
 
   # Copy custom RAMA assets AFTER vite build (overwrite generated files)
   msg2 "Installing custom RAMA logo and favicon..."

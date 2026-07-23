@@ -56,11 +56,15 @@ cp "$STASH/sxng-ltr.rama.min.css" "$CSSDIR/sxng-ltr.min.css"
 cp "$STASH/sxng-rtl.rama.min.css" "$CSSDIR/sxng-rtl.min.css"
 rm -rf "$STASH"
 
+# Restore the build entry to the RAMA (default) palette. The variant loop above
+# leaves it on the last variant built (google-dark); without this, any later
+# manual `vite build` in this checkout silently produces a google-dark bundle.
+cp "$THEME/rama/definitions.less" "client/simple/src/less/definitions.less"
+
 # --- 4. fonts + template forks + branding (after builds, so nothing wipes them) ---
 mkdir -p "$CSSDIR/fonts"
 cp "$THEME/rama/fonts/"*.woff2 "$CSSDIR/fonts/" 2>/dev/null || true
-cp "$THEME/rama/templates/index.html"   "searx/templates/simple/index.html"
-cp "$THEME/rama/templates/results.html" "searx/templates/simple/results.html"
+cp "$THEME/rama/templates/"*.html "searx/templates/simple/"
 [ -f "$RAMA/brand/searxng.png"  ] && cp "$RAMA/brand/searxng.png"  "$CSSDIR/img/searxng.png"
 [ -f "$RAMA/assets/favicon.svg" ] && cp "$RAMA/assets/favicon.svg" "$CSSDIR/img/favicon.svg"
 [ -f "$RAMA/assets/favicon.png" ] && cp "$RAMA/assets/favicon.png" "$CSSDIR/img/favicon.png"
