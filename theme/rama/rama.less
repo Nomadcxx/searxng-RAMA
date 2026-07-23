@@ -97,16 +97,32 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .search_categories{display:flex;flex-wrap:wrap;gap:var(--sp-2);justify-content:center;margin-top:var(--sp-5)}
 /* real markup: .category (div) > hidden checkbox + <label> (icon + .category_name).
    Style the div as a compact pill; the label carries the icon+name flex row. */
-.category{
-  padding:.32rem .72rem;border-radius:var(--r-pill);
-  background:var(--surface);border:1px solid var(--line);color:var(--muted);
-  font-family:var(--font-mono);font-size:.72rem;transition:all var(--dur) var(--ease)}
+/* shared: hide the real checkbox, lay the label out as icon + name */
+.category{margin:0;padding:0;background:none;border:0}
 .category input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .category label,.category .tooltips{display:inline-flex;align-items:center;gap:.4rem;color:inherit;cursor:pointer;margin:0}
 .category .category_name{font-family:var(--font-mono);line-height:1}
-.category svg,.category .ionicon{width:14px;height:14px;stroke:currentColor}
-.category:hover{color:var(--ink);border-color:var(--line-2);background:var(--surface-2)}
-.category:has(input:checked),.category.selected{color:var(--ink);border-color:var(--accent);background:color-mix(in srgb,var(--accent-fill) 14%,var(--surface))}
+.category svg,.category .ionicon{width:14px;height:14px;stroke:currentColor;padding:0}
+
+/* HOME — chips. The pill lives on the LABEL so the box always wraps its own
+   content (putting it on the .category div clipped the text). */
+.home .category label{
+  padding:.4rem .8rem;border-radius:var(--r-pill);
+  background:var(--surface);border:1px solid var(--line);border-bottom-width:1px;
+  color:var(--muted);font-family:var(--font-mono);font-size:.74rem;
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease),background var(--dur) var(--ease)}
+.home .category label:hover{color:var(--ink);border-color:var(--line-2);background:var(--surface-2)}
+.home .category input:checked+label{color:var(--ink);border-color:var(--accent);background:color-mix(in srgb,var(--accent-fill) 16%,var(--surface))}
+
+/* RESULTS APP BAR — a real tab strip, not chips: muted label, accent text +
+   accent underline when selected (upstream's own pattern, restyled). */
+.appbar-tabs .category{margin-right:var(--sp-4)}
+.appbar-tabs .category label{
+  padding:.55rem .15rem;border-bottom:2px solid transparent;border-radius:0;background:none;
+  color:var(--muted);font-family:var(--font-mono);font-size:.78rem;
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+.appbar-tabs .category label:hover{color:var(--ink)}
+.appbar-tabs .category input:checked+label{color:var(--accent);border-bottom-color:var(--accent)}
 .hint{margin-top:var(--sp-6);font-family:var(--font-mono);font-size:.72rem;color:var(--faint)}
 /* always-reachable settings on the home view */
 .home-settings{
