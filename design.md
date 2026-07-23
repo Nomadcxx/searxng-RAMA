@@ -22,8 +22,12 @@ carries the page.
 - **App pages** (`results.html`, `preferences.html`, `stats.html`) — **Workbench
   shell**: top-anchored app bar → content rail → optional side panel. Variation
   knobs: side panel present/absent, rail width, tab strip present/absent.
+  Built. `results` carries the search field in the bar and a side panel;
+  `preferences` / `stats` use the plain bar (`page_with_header.html`) and no panel.
+  Rail: `--rail-app` (1080px) for forms/prose, 1180px for the results grid.
 - **Content pages** (`info.html`, `404.html`, `new_issue.html`) — **Long Document**:
-  single contained prose column, no side panel.
+  single contained prose column, no side panel. `info` built; `404` /
+  `new_issue` extend `base.html` directly and are still upstream.
 
 ## Theme (RAMA — the default variant)
 
@@ -34,7 +38,7 @@ carries the page.
 | `--ink` / `--muted` / `--faint` | `#eef2f6` / `#aab4c5` / `#8d99ae` | text ramp |
 | `--accent` | `#ff7282` | **interactive text only** — hover, active, focus ring |
 | `--accent-fill` / `--accent-fill-2` | `#e11235` / `#c30a29` | CTA + current-state fills (white label) |
-| `--ok` / `--warn` | `#5fd08a` / `#e6c15a` | semantic, never used as accent |
+| `--ok` / `--warn` / `--bad` | `#5fd08a` / `#e6c15a` / `#ff8a65` | semantic, never used as accent |
 | `--line` / `--line-2` | `rgba(255,255,255,.08)` / `.14` | hairlines |
 
 `google-light` and `google-dark` are **palette variants of this same layout** —

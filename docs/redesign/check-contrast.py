@@ -50,19 +50,27 @@ def palette_checks(name, p):
         (f"{name}: CTA white / fill-2",    WHITE, p["fill2"], 4.5),
         (f"{name}: success / surface",     p["ok"],   s,  4.5),
         (f"{name}: warning / surface",     p["warn"], s,  4.5),
+        # app pages (preferences/stats) put semantic text on the page ground
+        (f"{name}: success / ground",      p["ok"],   g,  4.5),
+        (f"{name}: warning / ground",      p["warn"], g,  4.5),
+        (f"{name}: error / ground",        p["bad"],  g,  4.5),
+        (f"{name}: error / surface",       p["bad"],  s,  4.5),
     ]
 
 
 # ---- one palette per switchable variant (docs/plan-of-record §7) ----
 RAMA = dict(ground="#1e2030", surface="#282a3b", surface2="#313349",
             ink="#eef2f6", muted="#aab4c5", faint="#8d99ae",
-            accent="#ff7282", fill="#e11235", fill2="#c30a29", ok="#5fd08a", warn="#e6c15a")
+            accent="#ff7282", fill="#e11235", fill2="#c30a29", ok="#5fd08a", warn="#e6c15a",
+            bad="#ff8a65")
 GOOGLE_LIGHT = dict(ground="#ffffff", surface="#ffffff", surface2="#f1f3f4",
                     ink="#202124", muted="#5f6368", faint="#6a6f74",
-                    accent="#1a0dab", fill="#e11235", fill2="#c30a29", ok="#0d652d", warn="#b06000")
+                    accent="#1a0dab", fill="#e11235", fill2="#c30a29", ok="#0d652d", warn="#b06000",
+                    bad="#c5221f")
 GOOGLE_DARK = dict(ground="#202124", surface="#303134", surface2="#3c3d40",
                    ink="#e8eaed", muted="#a8aeb4", faint="#979da3",
-                   accent="#8ab4f8", fill="#e11235", fill2="#c30a29", ok="#81c995", warn="#fdd663")
+                   accent="#8ab4f8", fill="#e11235", fill2="#c30a29", ok="#81c995", warn="#fdd663",
+                   bad="#f28b82")
 
 CHECKS = (palette_checks("rama", RAMA)
           + palette_checks("google-light", GOOGLE_LIGHT)
