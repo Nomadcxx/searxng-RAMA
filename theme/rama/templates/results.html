@@ -10,17 +10,9 @@
 {% block title %}{% if query_in_title %}{{- q|e }} - {% endif %}{% endblock %}
 {% block meta %}<link rel="alternate" type="application/rss+xml" title="Searx search: {{ q|e }}" href="{{ url_for('search', _external=True) }}?q={{ q|urlencode }}&amp;categories={{ selected_categories|join(",") | replace(' ','+') }}&amp;pageno={{ pageno }}&amp;time_range={{ time_range }}&amp;language={{ current_language }}&amp;safesearch={{ safesearch }}&amp;format=rss">{% endblock %}
 {% block content %}
-<header class="rheader">
-  <a class="rmark" href="{{ url_for('index') }}" aria-label="{{ instance_name|e }}">
-    <span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
-    <span class="rwm">{{ instance_name|e }}</span>
-  </a>
-  {% include 'simple/search.html' %}
-  <nav class="nav-actions">
-    <a href="{{ url_for('info', pagename='about') }}" aria-label="{{ _('About') }}">{{ icon_big('information-circle') }}</a>
-    <a href="{{ url_for('preferences') }}" aria-label="{{ _('Preferences') }}">{{ icon_big('settings') }}</a>
-  </nav>
-</header>
+{# The RAMA app bar (lockup ▸ search ▸ actions) lives in the forked
+   simple/search.html, so it is shared by every page that includes it. #}
+{% include 'simple/search.html' %}
 
 {% if results and results|map(attribute='template')|unique|list|count == 1 %}
   {% set only_template = 'only_template_' + results[0]['template']|default('default')|replace('.html', '') %}
@@ -36,7 +28,7 @@
 
     <div id="sidebar">
 
-        {%- if number_of_results != '0' -%}
+        {%- if number_of_results and number_of_results != '0' -%}
         <p id="result_count"><small>{{ _('Number of results') }}: {{ number_of_results }}</small></p>
         {%- endif -%}
 

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"strings"
 	"time"
@@ -146,14 +148,24 @@ func newModel() model {
 		currentTaskIndex: -1,
 		spinner:          s,
 		errors:           []string{},
-		installPath:      defaultInstallPath,
-		sourcePath:       defaultSourcePath,
-		user:             defaultUser,
-		serviceName:      defaultServiceName,
-		selectedTheme:    defaultThemeIndex,
+		// Source/install paths default to /opt/searxng-rama (AUR + switch/uninstall
+		// modes), but the cross-distro install.sh overrides RAMA_SOURCE_PATH to point
+		// at the freshly-built SearXNG checkout it copies from.
+		installPath:   getenvDefault("RAMA_INSTALL_PATH", defaultInstallPath),
+		sourcePath:    getenvDefault("RAMA_SOURCE_PATH", defaultSourcePath),
+		user:          defaultUser,
+		serviceName:   defaultServiceName,
+		selectedTheme: defaultThemeIndex,
 	}
 
 	return m
+}
+
+func getenvDefault(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }
 
 func (m model) Init() tea.Cmd {
@@ -581,11 +593,12 @@ func validateSource(m *model) error {
 		}
 	}
 
-	// Validate theme files exist (warnings only, not failures)
+	// Validate pre-built theme bundles exist (warnings only, not failures).
+	// These are produced by the build; without them, theme-switch can't work.
 	for _, theme := range availableThemes {
-		themePath := filepath.Join(m.sourcePath, "searx", "static", "themes", "simple", "themes", theme.path, "definitions.less")
-		if !fileExists(themePath) {
-			fmt.Fprintf(os.Stderr, "[WARNING] Theme file not found: %s\n", themePath)
+		bundle := filepath.Join(m.sourcePath, "searx", "static", "themes", "simple", fmt.Sprintf("sxng-ltr.%s.min.css", theme.id))
+		if !fileExists(bundle) {
+			fmt.Fprintf(os.Stderr, "[WARNING] theme bundle not found: %s (switching to %q will fail)\n", bundle, theme.id)
 		}
 	}
 
@@ -601,7 +614,9 @@ func createInstallDir(m *model) error {
 
 func copySearxngFiles(m *model) error {
 	dirs := []string{"searx", "dockerfiles", "docs", "utils"}
-	files := []string{"Makefile", "manage", "requirements.txt", "requirements-dev.txt", "setup.py", "babel.cfg", ".git"}
+	// Note: .git is intentionally NOT copied — it bloats the install and would
+	// expose repository history if the install dir were ever web-served.
+	files := []string{"Makefile", "manage", "requirements.txt", "requirements-dev.txt", "setup.py", "babel.cfg"}
 
 	for _, dir := range dirs {
 		srcDir := filepath.Join(m.sourcePath, dir)
@@ -638,45 +653,27 @@ func copySearxngFiles(m *model) error {
 	return nil
 }
 
+// applyTheme switches the served theme by swapping in the pre-built CSS bundle
+// for the selected variant. SearXNG serves precompiled CSS (sxng-<side>.min.css)
+// — there is no runtime LESS compilation — so the package/installer builds one
+// bundle per variant (sxng-<side>.<variant>.min.css) and switching is just a
+// file copy + service restart. No recompilation needed.
 func applyTheme(m *model) error {
-	selectedTheme := availableThemes[m.selectedTheme]
+	variant := availableThemes[m.selectedTheme].id
+	cssDir := filepath.Join(m.installPath, "searx", "static", "themes", "simple")
 
-	sourceFile := filepath.Join(m.sourcePath, "searx", "static", "themes", "simple", "themes", selectedTheme.path, "definitions.less")
-	destFile := filepath.Join(m.installPath, "searx", "static", "themes", "simple", "css", "definitions.less")
-
-	if !fileExists(sourceFile) {
-		return fmt.Errorf("theme file not found: %s", sourceFile)
-	}
-
-	destDir := filepath.Dir(destFile)
-	if !dirExists(destDir) {
-		if err := os.MkdirAll(destDir, 0o755); err != nil {
-			return fmt.Errorf("create destination directory: %w", err)
+	for _, side := range []string{"ltr", "rtl"} {
+		src := filepath.Join(cssDir, fmt.Sprintf("sxng-%s.%s.min.css", side, variant))
+		dst := filepath.Join(cssDir, fmt.Sprintf("sxng-%s.min.css", side))
+		if !fileExists(src) {
+			return fmt.Errorf("pre-built theme bundle not found: %s (was the install built with theme variants?)", src)
+		}
+		if err := copyFile(src, dst); err != nil {
+			return fmt.Errorf("apply theme %s (%s): %w", variant, side, err)
 		}
 	}
 
-	themeContent, err := os.ReadFile(sourceFile)
-	if err != nil {
-		return fmt.Errorf("read theme file: %w", err)
-	}
-
-	themeStr := string(themeContent)
-
-	switch selectedTheme.id {
-	case "google-light":
-		themeStr = strings.Replace(themeStr, `:root.theme-auto`, `:root.theme-light`, 1)
-		themeStr = strings.Replace(themeStr, `@media (prefers-color-scheme: dark)`, `/* @media (prefers-color-scheme: dark) */`, 1)
-	case "google-dark":
-		themeStr = strings.Replace(themeStr, `:root.theme-auto`, `:root.theme-dark`, 1)
-		themeStr = strings.Replace(themeStr, `@media (prefers-color-scheme: dark)`, `/* @media (prefers-color-scheme: dark) */`, 1)
-	}
-
-	if err := os.WriteFile(destFile, []byte(themeStr), 0o644); err != nil {
-		return fmt.Errorf("write theme file: %w", err)
-	}
-
-	fmt.Fprintf(os.Stderr, "[DEBUG] Applied theme: %s\n", selectedTheme.name)
-
+	fmt.Fprintf(os.Stderr, "[DEBUG] Applied theme variant: %s\n", variant)
 	return nil
 }
 
@@ -704,11 +701,18 @@ func installPythonDeps(m *model) error {
 		return fmt.Errorf("venv creation failed: %s", string(output))
 	}
 
-	// Install dependencies in venv
+	// Install dependencies in venv, bounded by a timeout so a hung network
+	// doesn't leave the installer spinning forever.
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+
 	pipBin := filepath.Join(venvPath, "bin", "pip")
-	pipCmd := exec.Command(pipBin, "install", "-r", requirementsPath)
+	pipCmd := exec.CommandContext(ctx, pipBin, "install", "-r", requirementsPath)
 	pipCmd.Dir = m.installPath
 	if output, err := pipCmd.CombinedOutput(); err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("pip install timed out after 15m (check network connectivity)")
+		}
 		return fmt.Errorf("pip install failed: %s", string(output))
 	}
 
@@ -724,8 +728,8 @@ func setupConfiguration(m *model) error {
 		return fmt.Errorf("read default settings: %w", err)
 	}
 
-	// Backup original
-	backupPath := settingsPath + ".bak." + fmt.Sprint(time.Now().Unix())
+	// Backup original to a single stable path (avoids accumulating .bak.<ts> files on reinstall)
+	backupPath := settingsPath + ".bak"
 	if err := os.WriteFile(backupPath, defaultSettings, 0o644); err == nil {
 		fmt.Fprintf(os.Stderr, "[DEBUG] Backed up original settings to: %s\n", backupPath)
 	}
@@ -752,23 +756,18 @@ func generateSecretKey() string {
 }
 
 func setPermissions(m *model) error {
-	cmd := exec.Command("id", "-u", m.user)
-	uidBytes, err := cmd.Output()
+	u, err := user.Lookup(m.user)
 	if err != nil {
-		return nil // User doesn't exist, skip
+		// Only "user does not exist" is a legitimate skip (e.g. bare-metal install
+		// before the service user is created). Any other lookup error is real.
+		if _, ok := err.(user.UnknownUserError); ok {
+			fmt.Fprintf(os.Stderr, "[WARNING] user %q not found; skipping ownership change\n", m.user)
+			return nil
+		}
+		return fmt.Errorf("lookup user %s: %w", m.user, err)
 	}
 
-	uid := strings.TrimSpace(string(uidBytes))
-
-	cmd = exec.Command("id", "-g", m.user)
-	gidBytes, err := cmd.Output()
-	if err != nil {
-		return fmt.Errorf("get group id for %s: %w", m.user, err)
-	}
-
-	gid := strings.TrimSpace(string(gidBytes))
-
-	chownCmd := exec.Command("chown", "-R", uid+":"+gid, m.installPath)
+	chownCmd := exec.Command("chown", "-R", u.Uid+":"+u.Gid, m.installPath)
 	if err := chownCmd.Run(); err != nil {
 		return fmt.Errorf("chown: %w", err)
 	}
@@ -798,8 +797,7 @@ WantedBy=multi-user.target
 	servicePath := filepath.Join("/etc/systemd/system", m.serviceName+".service")
 
 	if fileExists(servicePath) {
-		backupPath := servicePath + ".bak." + fmt.Sprint(time.Now().Unix())
-		copyFile(servicePath, backupPath)
+		copyFile(servicePath, servicePath+".bak")
 	}
 
 	if err := os.WriteFile(servicePath, []byte(serviceContent), 0o644); err != nil {
@@ -859,8 +857,7 @@ func removeServiceFile(m *model) error {
 
 func removeInstallation(m *model) error {
 	if dirExists(m.installPath) {
-		cmd := exec.Command("rm", "-rf", m.installPath)
-		if err := cmd.Run(); err != nil {
+		if err := os.RemoveAll(m.installPath); err != nil {
 			return fmt.Errorf("remove installation: %w", err)
 		}
 	}

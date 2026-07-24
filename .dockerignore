@@ -1,0 +1,14 @@
+# Only theme sources, build scripts and branding assets are needed in the image
+# build context (scripts/build-themes.sh consumes them).
+.git
+docs
+cmd
+go.mod
+go.sum
+rama-installer
+PKGBUILD
+searxng-rama.install
+install.sh
+Dockerfile
+docker-compose.yaml
+*.md

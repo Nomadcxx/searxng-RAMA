@@ -1,0 +1,51 @@
+{% from 'simple/icons.html' import icon_big %}
+{#
+  RAMA app bar (fork of simple/search.html).
+
+  Upstream lays #search_header out as a CSS grid ("logo search" / "spacer
+  categories") sized off @results-offset. Wrapping that grid produced a large
+  empty band above the results, so RAMA owns this markup instead: a single
+  top-anchored bar — lockup ▸ search ▸ actions — then the tab strip and filters.
+
+  Everything functional is preserved verbatim: the form, #q, #clear_search /
+  #send_search (including the search_on_category_select name), the autocomplete
+  container, the categories + filter includes and the hidden inputs.
+#}
+<form id="search" method="{{ method or 'POST' }}" action="{{ url_for('search') }}" role="search">
+  <div class="appbar">
+    <a class="appbar-mark" href="{{ url_for('index') }}" tabindex="0" title="{{ _('Display the front page') }}">
+      <span class="glyph" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </span>
+      <span class="rwm"><b>searxng</b><span class="sep">/</span>rama</span>
+    </a>
+
+    <div id="search_view">
+      <div class="search_box">
+        <input id="q" name="q" type="text" placeholder="{{ _('Search for...') }}" tabindex="1" autocomplete="off" autocapitalize="none" spellcheck="false" autocorrect="off" dir="auto" value="{{ q or '' }}">
+        <button id="clear_search" type="reset" aria-label="{{ _('clear') }}" class="hide_if_nojs"><span>{{ icon_big('close') }}</span><span class="show_if_nojs">{{ _('clear') }}</span></button>
+        <button id="send_search" type="submit" {%- if search_on_category_select -%}name="category_{{ selected_categories[0]|replace(' ', '_') }}"{%- endif -%} aria-label="{{ _('search') }}"><span class="hide_if_nojs">{{ icon_big('search') }}</span><span class="show_if_nojs">{{ _('search') }}</span></button>
+        <div class="autocomplete hide_if_nojs"><ul></ul></div>
+      </div>
+    </div>
+
+    <nav class="appbar-actions" aria-label="{{ _('Links') }}">
+      <a href="{{ url_for('info', pagename='about') }}" title="{{ _('About') }}" aria-label="{{ _('About') }}">{{ icon_big('information-circle') }}</a>
+      <a href="{{ url_for('preferences') }}" title="{{ _('Preferences') }}" aria-label="{{ _('Preferences') }}">{{ icon_big('settings') }}</a>
+    </nav>
+  </div>
+
+  <div class="appbar-tabs">
+    {% set display_tooltip = true %}
+    {% include 'simple/categories.html' %}
+  </div>
+
+  <div class="search_filters">
+    {% include 'simple/filters/languages.html' %}
+    {% include 'simple/filters/time_range.html' %}
+    {% include 'simple/filters/safesearch.html' %}
+  </div>
+
+  <input type="hidden" name="theme" value="{{ theme }}" >
+  {% if timeout_limit %}<input type="hidden" name="timeout_limit" value="{{ timeout_limit|e }}" >{% endif %}
+</form>

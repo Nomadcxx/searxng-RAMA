@@ -12,7 +12,7 @@
  * - accent:        #ff7282  (interactive text / hover)
  * - accent-fill:   #e11235  (CTA/pill fills, white label 4.84:1)
  * - accent-fill-2: #c30a29  (active/gradient bottom)
- * - ok: #5fd08a  ·  warn: #e6c15a
+ * - ok: #5fd08a  ·  warn: #e6c15a  ·  bad: #ff8a65
  * Type: Inter (titles/body) + JetBrains Mono (search vernacular) — self-hosted.
  */
 
@@ -26,6 +26,16 @@
 
 /// RAMA Dark Theme (Default) — locked dark palette
 :root {
+  /// Redesign layout tokens — consumed by the shared rama.less layer.
+  /// Each theme provides its own palette here; rama.less is theme-neutral.
+  color-scheme: dark;
+  --ground:#1e2030; --ground-2:#191b28;
+  --surface:#282a3b; --surface-2:#313349; --surface-3:#3a3c54;
+  --ink:#eef2f6; --muted:#aab4c5; --faint:#8d99ae;
+  --accent:#ff7282; --accent-fill:#e11235; --accent-fill-2:#c30a29;
+  --ok:#5fd08a; --warn:#e6c15a; --bad:#ff8a65;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --glow:rgba(239,35,60,.16);
   /// Base Colors
   --color-base-font: #eef2f6;
   --color-base-font-rgb: 238, 242, 246;

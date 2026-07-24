@@ -1,20 +1,10 @@
-/* RAMA redesign override layer — imported last so it wins the cascade.
-   Dual token system: definitions.less maps upstream --color-* names to
-   these semantic tokens. Edit --ground/--surface/--ink here, not in
-   definitions.less — the upstream names are aliases. */
+/* RAMA redesign layout layer — THEME-NEUTRAL, imported last so it wins the cascade.
+   The colour PALETTE (--ground/--surface/--accent/…) is defined per-theme in each
+   theme's definitions.less, so this same layer themes rama, google-light and
+   google-dark. Only structural tokens (fonts, spacing, radius, motion) live here. */
 @import "./fonts.less";
 
 :root{
-  color-scheme: dark;
-  --ground:#1e2030; --ground-2:#191b28;
-  --surface:#282a3b; --surface-2:#313349; --surface-3:#3a3c54;
-  --ink:#eef2f6; --muted:#aab4c5; --faint:#8d99ae;
-  --accent:#ff7282;          /* interactive text / hover / underline */
-  --accent-fill:#e11235;     /* brand red — CTA/pill fills (white label 4.84:1) */
-  --accent-fill-2:#c30a29;   /* active / gradient bottom (white label 6.18:1) */
-  --ok:#5fd08a; --warn:#e6c15a;
-  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
-  --glow:rgba(239,35,60,.16);
   --font-ui:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Menlo,monospace;
   --sp-1:.25rem; --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem; --sp-5:1.5rem; --sp-6:2rem; --sp-8:3rem; --sp-10:4.5rem;
@@ -30,14 +20,19 @@ body{
   font-family:var(--font-ui); line-height:1.55;
   -webkit-font-smoothing:antialiased;
 }
-.home a,.rheader a{color:inherit;text-decoration:none}
+.home a,.appbar a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 
 /* ================= HOME ================= */
 
+/* our design replaces the upstream top nav (#links_on_top) with the corner cog
+   on home + the rheader actions on results; kill it and any main padding so the
+   hero (and its top glow) start at the true viewport top */
+#links_on_top{display:none}
+#main_index{padding:0;margin:0}
 .home{
-  min-height:78vh;display:grid;place-items:center;padding:var(--sp-10) var(--sp-5);
+  min-height:100vh;display:grid;place-items:center;padding:var(--sp-8) var(--sp-5);
   position:relative;overflow:hidden;
   background:
     radial-gradient(58% 36% at 50% -4%, rgba(239,35,60,.11), transparent 60%),
@@ -79,28 +74,55 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   font-size:1.05rem;padding:.55rem 0;
 }
 #q::placeholder{color:var(--faint)}
-#clear_search{width:38px;height:38px;border-radius:50%;color:var(--muted);display:grid;place-items:center}
+/* real markup: #clear_search / #send_search wrap an ion-icon in a .hide_if_nojs
+   span (icon, JS on) + a .show_if_nojs text span (fallback). Size to the icon
+   only and centre it — no phantom label width. */
+#clear_search{width:40px;height:40px;border-radius:50%;color:var(--muted);display:grid;place-items:center;flex:0 0 auto;padding:0}
 #clear_search:hover{background:var(--surface-2);color:var(--ink)}
-#clear_search svg{width:16px;height:16px}
+#clear_search .hide_if_nojs{display:grid;place-items:center;line-height:0}
+#clear_search .show_if_nojs{display:none}
+#clear_search svg,#clear_search .ionicon{width:16px;height:16px}
 #send_search{
-  height:44px;padding:0 1.2rem;border-radius:var(--r-pill);
-  background:linear-gradient(160deg,var(--accent-fill),var(--accent-fill-2));color:#fff;font-weight:600;
-  display:inline-flex;align-items:center;gap:.5rem;
+  width:44px;height:44px;min-width:44px;padding:0;border-radius:var(--r-pill);flex:0 0 auto;
+  background:linear-gradient(160deg,var(--accent-fill),var(--accent-fill-2));color:#fff;
+  display:grid;place-items:center;
   box-shadow:0 4px 16px var(--glow);transition:transform var(--dur) var(--ease),filter var(--dur) var(--ease)}
 #send_search:hover{filter:brightness(1.08)}
 #send_search:active{transform:translateY(1px)}
-#send_search svg{width:18px;height:18px;stroke:#fff}
-#send_search .label{font-size:.95rem}
+#send_search .hide_if_nojs{display:grid;place-items:center;line-height:0}
+#send_search .show_if_nojs{display:none}
+#send_search svg,#send_search .ionicon{width:20px;height:20px}
 
 /* categories — real classes: .search_categories .category .category_name */
 .search_categories{display:flex;flex-wrap:wrap;gap:var(--sp-2);justify-content:center;margin-top:var(--sp-5)}
-.category{
-  display:inline-flex;align-items:center;gap:.45rem;padding:.5rem .9rem;border-radius:var(--r-pill);
-  background:var(--surface);border:1px solid var(--line);color:var(--muted);
-  font-family:var(--font-mono);font-size:.8rem;transition:all var(--dur) var(--ease)}
-.category svg{width:15px;height:15px;stroke:currentColor}
-.category:hover{color:var(--ink);border-color:var(--line-2);background:var(--surface-2)}
-.category.selected{color:var(--ink);border-color:var(--accent);background:color-mix(in srgb,var(--accent-fill) 14%,var(--surface))}
+/* real markup: .category (div) > hidden checkbox + <label> (icon + .category_name).
+   Style the div as a compact pill; the label carries the icon+name flex row. */
+/* shared: hide the real checkbox, lay the label out as icon + name */
+.category{margin:0;padding:0;background:none;border:0}
+.category input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.category label,.category .tooltips{display:inline-flex;align-items:center;gap:.4rem;color:inherit;cursor:pointer;margin:0}
+.category .category_name{font-family:var(--font-mono);line-height:1}
+.category svg,.category .ionicon{width:14px;height:14px;stroke:currentColor;padding:0}
+
+/* HOME — chips. The pill lives on the LABEL so the box always wraps its own
+   content (putting it on the .category div clipped the text). */
+.home .category label{
+  padding:.4rem .8rem;border-radius:var(--r-pill);
+  background:var(--surface);border:1px solid var(--line);border-bottom-width:1px;
+  color:var(--muted);font-family:var(--font-mono);font-size:.74rem;
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease),background var(--dur) var(--ease)}
+.home .category label:hover{color:var(--ink);border-color:var(--line-2);background:var(--surface-2)}
+.home .category input:checked+label{color:var(--ink);border-color:var(--accent);background:color-mix(in srgb,var(--accent-fill) 16%,var(--surface))}
+
+/* RESULTS APP BAR — a real tab strip, not chips: muted label, accent text +
+   accent underline when selected (upstream's own pattern, restyled). */
+.appbar-tabs .category{margin-right:var(--sp-4)}
+.appbar-tabs .category label{
+  padding:.55rem .15rem;border-bottom:2px solid transparent;border-radius:0;background:none;
+  color:var(--muted);font-family:var(--font-mono);font-size:.78rem;
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+.appbar-tabs .category label:hover{color:var(--ink)}
+.appbar-tabs .category input:checked+label{color:var(--accent);border-bottom-color:var(--accent)}
 .hint{margin-top:var(--sp-6);font-family:var(--font-mono);font-size:.72rem;color:var(--faint)}
 /* always-reachable settings on the home view */
 .home-settings{
@@ -111,35 +133,78 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .home-settings svg{width:22px;height:22px;stroke:currentColor}
 .hint kbd{background:var(--surface);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;padding:.05rem .4rem;color:var(--muted)}
 
-/* ================= RESULTS ================= */
-.rheader{
+/* ================= APP BAR (shared: results / preferences / stats) =========
+   Markup comes from our forked simple/search.html — a flat bar, not upstream's
+   #search_header grid. Reset the upstream form centring first so the bar can
+   own the layout. */
+#search{display:block;width:100%;margin:0;padding:0}
+.appbar{
   position:sticky;top:0;z-index:20;background:var(--ground);
-  background:color-mix(in srgb,var(--ground) 86%,transparent);
+  background:color-mix(in srgb,var(--ground) 88%,transparent);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
   border-bottom:1px solid var(--line);
-  display:flex;align-items:center;gap:var(--sp-4);padding:var(--sp-3) var(--sp-5);
+  display:flex;align-items:center;gap:var(--sp-4);
+  padding:var(--sp-3) var(--sp-5);
 }
-.rheader .rmark{display:inline-flex;align-items:center;gap:.6rem;flex:0 0 auto}
-.rheader .glyph{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(160deg,var(--accent-fill),var(--accent-fill-2))}
-.rheader .glyph svg{width:17px;height:17px;stroke:#fff}
-.rheader .rwm{font-family:var(--font-mono);font-weight:600;font-size:1rem}
-.rheader .rwm span{color:var(--accent)}
-.rheader form{flex:1;max-width:560px}
-.rheader .search_box{padding:.25rem .25rem .25rem .9rem;box-shadow:none;border-radius:var(--r-md)}
-.rheader .search_box:focus-within{box-shadow:0 0 0 3px var(--glow)}
-.rheader #q{font-size:.95rem;padding:.4rem 0}
-.rheader #send_search{height:36px;padding:0 .8rem}
-.rheader .nav-actions{margin-left:auto;display:flex;gap:.35rem;flex:0 0 auto}
-.rheader .nav-actions a{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;color:var(--muted);transition:all var(--dur) var(--ease)}
-.rheader .nav-actions a:hover{background:var(--surface);color:var(--ink)}
-.rheader .nav-actions svg{width:19px;height:19px;stroke:currentColor}
+.appbar-mark{display:inline-flex;align-items:center;gap:.6rem;flex:0 0 auto}
+.appbar-mark .glyph{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(160deg,var(--accent-fill),var(--accent-fill-2))}
+.appbar-mark .glyph svg{width:17px;height:17px;stroke:#fff}
+.appbar-mark .rwm{font-family:var(--font-mono);font-weight:600;font-size:1rem;white-space:nowrap}
+.appbar-mark .rwm b{color:var(--ink);font-weight:700}
+.appbar-mark .rwm .sep{color:var(--accent)}
+.appbar #search_view{flex:1;min-width:0;max-width:640px}
+.appbar .search_box{padding:.25rem .25rem .25rem .9rem;box-shadow:none;border-radius:var(--r-md)}
+.appbar .search_box:focus-within{box-shadow:0 0 0 3px var(--glow)}
+.appbar #q{font-size:.95rem;padding:.4rem 0}
+.appbar #send_search{width:36px;height:36px;min-width:36px}
+.appbar #clear_search{width:32px;height:32px}
+.appbar-actions{margin-left:auto;display:flex;gap:.35rem;flex:0 0 auto}
+.appbar-actions a{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;color:var(--muted);transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
+.appbar-actions a:hover{background:var(--surface);color:var(--ink)}
+.appbar-actions svg,.appbar-actions .ionicon{width:19px;height:19px}
+
+/* tab strip + filters sit under the bar, aligned to the results rail */
+.appbar-tabs{border-bottom:1px solid var(--line);padding:0 var(--sp-5)}
+.appbar-tabs #categories{justify-content:flex-start;margin:0;padding:.35rem 0;border:0}
+.search_filters{display:flex;justify-content:flex-start;flex-wrap:wrap;gap:var(--sp-3);padding:.5rem var(--sp-5);width:100%;max-width:100%}
+.search_filters select{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);color:var(--muted);font-family:var(--font-mono);font-size:.78rem;padding:.25rem .5rem}
 
 /* result rows — real classes: article.result .url_header .url_wrapper h3 .content .engines */
-#urls{display:flex;flex-direction:column;gap:var(--sp-2)}
+/* results shell — centred Workbench rail + side panel, replacing upstream's
+   fixed `#results{margin-left:10rem}`. Tabs/filters align to the same rail. */
+#results{
+  max-width:1180px;margin:0 auto;padding:var(--sp-5) var(--sp-5) var(--sp-10);
+  display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:var(--sp-8);align-items:start;
+}
+.appbar-tabs #categories,.search_filters{max-width:1180px;margin-inline:auto;width:100%}
+/* rail and panel both start at the top row — otherwise an empty answers/corrections
+   slot takes row 1 and pushes the results column down. */
+#results>#urls{grid-column:1;grid-row:1}
+#results>#sidebar{grid-column:2;grid-row:1}
+
+#urls{display:flex;flex-direction:column;gap:var(--sp-2);min-width:0}
+
+/* ONE LEFT EDGE (design.md non-negotiable #2). Upstream floats a.thumbnail_link
+   left, so the snippet wraps underneath the image and the column goes ragged.
+   Grid instead: every text element shares column 1; media sits in column 2 and
+   text never wraps around it. Explicit rows let the media span the row block. */
 .result{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto auto auto auto;
+  column-gap:var(--sp-4);
   padding:var(--sp-4);border-radius:var(--r-md);border:1px solid transparent;
   transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),transform var(--dur) var(--ease);
 }
+.result>*{grid-column:1;min-width:0}
+.result>.thumbnail_link{grid-column:2;grid-row:1/-1;align-self:start;float:none;margin:0}
+/* Match upstream's `.result a.thumbnail_link img.thumbnail` specificity so our
+   fixed box wins (it sets height:unset). A thumbnail that fails to load must not
+   collapse to zero height and shift the row. */
+.result a.thumbnail_link img.thumbnail{
+  width:104px;height:104px;max-width:none;object-fit:cover;
+  border-radius:var(--r-sm);display:block;margin:0;background:var(--surface-2)}
+.result .break{display:none} /* upstream float clearfix — an empty grid row here */
 .result:hover{background:var(--surface);border-color:var(--line);transform:translateY(-1px)}
 .url_header{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem}
 .favicon{width:18px;height:18px;border-radius:5px;background:var(--surface-2);display:grid;place-items:center;flex:0 0 auto;font-family:var(--font-mono);font-size:10px;color:var(--muted)}
@@ -150,22 +215,33 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .result h3 a{color:var(--ink);transition:color var(--dur) var(--ease);text-decoration-color:transparent;text-underline-offset:3px}
 .result:hover h3 a,.result h3 a:hover{color:var(--accent);text-decoration:underline;text-decoration-color:var(--accent)}
 .result .content{margin:0;color:var(--muted);font-size:.92rem;max-width:var(--measure)}
-.result .engines{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem;align-items:center}
+/* meta line sits with its result, left-aligned (upstream floats it right) */
+.result .engines{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem;align-items:center;float:none;justify-content:flex-start}
 .result .engines span{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.02em;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);padding:.1rem .45rem;border-radius:var(--r-sm)}
 .result .cache_link{color:var(--faint);font-family:var(--font-mono);font-size:.68rem;margin-left:.2rem}
 .result .cache_link:hover{color:var(--accent)}
 
-/* sidebar — real ids: #sidebar #infoboxes */
-#sidebar{display:flex;flex-direction:column;gap:var(--sp-4)}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4)}
-.card .title{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 .75rem}
-.infobox h4{margin:.2rem 0 .5rem;font-size:1.05rem}
-.infobox p{margin:0 0 .6rem;color:var(--muted);font-size:.88rem}
-.infobox .attr{display:flex;justify-content:space-between;gap:1rem;padding:.4rem 0;border-top:1px solid var(--line);font-size:.85rem}
-.infobox .attr span:first-child{color:var(--faint)}
-.suggestions .chips{display:flex;flex-wrap:wrap;gap:.4rem}
-.suggestions .chips a{font-size:.82rem;color:var(--accent);border:1px solid var(--line);padding:.25rem .6rem;border-radius:var(--r-pill);transition:all var(--dur) var(--ease)}
-.suggestions .chips a:hover{background:color-mix(in srgb,var(--accent-fill) 12%,var(--surface));border-color:var(--accent)}
+/* side panel — REAL markup: #sidebar > #result_count, #infoboxes
+   (details.sidebar-collapsible > summary.title), #suggestions, #search_url … */
+#sidebar{display:flex;flex-direction:column;gap:var(--sp-4);min-width:0;margin:0;padding:0}
+#sidebar>*{margin:0}
+#sidebar #result_count{font-family:var(--font-mono);font-size:.72rem;color:var(--faint)}
+/* panel styling on the TOP level only — #infoboxes wraps a <details>, so styling
+   both nests one bordered box inside another. */
+#sidebar>#infoboxes,#sidebar>#suggestions,#sidebar>#search_url,#sidebar>#apis,#sidebar>details{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4)}
+#sidebar #infoboxes details,#sidebar #infoboxes .infobox{background:none;border:0;padding:0;margin:0}
+#sidebar summary{
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);cursor:pointer;list-style:none;margin:0 0 .5rem}
+#sidebar summary::-webkit-details-marker{display:none}
+#sidebar .infobox img{max-width:100%;height:auto;border-radius:var(--r-sm)}
+#sidebar .infobox h1,#sidebar .infobox h2,#sidebar .infobox h3,#sidebar .infobox h4{
+  margin:.2rem 0 .5rem;font-size:1.05rem;color:var(--ink);font-weight:600}
+#sidebar p{margin:0 0 .6rem;color:var(--muted);font-size:.88rem}
+#sidebar a{color:var(--accent)}
+#sidebar table{width:100%;border-collapse:collapse;font-size:.85rem}
+#sidebar td,#sidebar th{padding:.35rem 0;border-top:1px solid var(--line);text-align:left;color:var(--muted);font-weight:400}
 
 /* pagination — real id: #pagination .page_number */
 #pagination{display:flex;justify-content:center;gap:.35rem;margin-top:var(--sp-8);flex-wrap:wrap}
@@ -177,35 +253,219 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 #pagination .page_number_current{background:linear-gradient(160deg,var(--accent-fill),var(--accent-fill-2));color:#fff;border-color:transparent}
 
 /* reveal on load */
-@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.result{animation:rise .4s var(--ease) backwards}
-#urls .result:nth-child(2){animation-delay:.04s}
-#urls .result:nth-child(3){animation-delay:.08s}
-#urls .result:nth-child(4){animation-delay:.12s}
-#urls .result:nth-child(5){animation-delay:.16s}
+/* No entrance animation on results. A reveal that starts at opacity:0 (with
+   `backwards` fill) hides every result until the animation runs — if it doesn't,
+   the page renders blank. Search results must paint immediately; the hover-lift
+   is the only motion this list needs. */
 
 footer{border-top:1px solid var(--line);padding:var(--sp-5);text-align:center;color:var(--faint);font-family:var(--font-mono);font-size:.72rem}
 footer a{color:var(--muted)}
 footer a:hover{color:var(--accent)}
 
-/* results header — upstream search.html wraps the search box in #search
-   (flex-column) > #search_header (grid: logo|view / spacer|categories).
-   We hide #search_logo (duplicate of .rmark) and flatten #search_header
-   to flex-column so search_box, categories, and filters stack inside the
-   560px form column. .rheader #search_header (1,1,0) beats upstream
-   #search_header (1,0,0) without !important. */
-.rheader #search_header{display:flex;flex-direction:column;gap:0;grid-template-areas:none}
-.rheader #search_logo{display:none}
-.rheader #search_view{width:100%}
-.rheader #categories{justify-content:flex-start;margin:0;padding:.2rem 0;border-bottom:1px solid var(--line)}
-.rheader .search_filters{display:flex;justify-content:flex-start;gap:var(--sp-3);padding:.2rem 0;width:100%;max-width:100%}
-.rheader .search_filters select{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);color:var(--muted);font-family:var(--font-mono);font-size:.78rem;padding:.2rem .5rem}
+/* Upstream still ships #search_header rules for its grid; our fork no longer
+   renders that element, so nothing to flatten. */
+
+/* ================= APP PAGES (preferences / stats / info) ==================
+   Workbench shell: the full-bleed app bar from our forked page_with_header.html,
+   then a centred content rail. Upstream sizes this shell at a hard
+   `width:85em` and lays every form row out with floats (legend left, .value
+   left, .description right at 50%) — which is what smeared the form across the
+   viewport with a dead gap down the middle. */
+:root{--rail-app:1080px}
+.appbar-plain{padding-block:var(--sp-3)}
+.page_with_header{width:100%;max-width:none;margin:0}
+/* the legacy pixel SEARXNG PNG — our fork never emits it; belt and braces */
+.page_with_header .logo{display:none}
+/* every child of the shell EXCEPT the bar rides the rail. min-width:0 is load
+   bearing: upstream gives .tabs `min-width:100%`, and min-width beats max-width,
+   so the info page's tab strip would blow straight through the rail. */
+.page_with_header>*:not(.appbar){
+  width:100%;max-width:var(--rail-app);min-width:0;margin-inline:auto;padding-inline:var(--sp-5)}
+.page_with_header>h1{
+  font-size:1.65rem;font-weight:600;letter-spacing:-.01em;
+  margin:var(--sp-6) auto var(--sp-5)}
+
+/* --- preferences ------------------------------------------------------- */
+/* form owns the footer row: Save left, Back/Reset right (upstream floats them,
+   which reversed their order and left them clear of the content). */
+#main_preferences form{
+  display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-4) var(--sp-3);
+  padding-bottom:var(--sp-8)}
+#main_preferences>form>.tabs{flex:0 0 100%;border-bottom:1px solid var(--line)}
+
+/* tab strip — same voice as the results app bar: muted label, accent text +
+   accent underline when selected. Never touch `display` on .tabs > section:
+   upstream drives panel visibility with `input:checked + label + section`. */
+#main_preferences .tabs{gap:0}
+#main_preferences .tabs>label{
+  order:1;margin:0 var(--sp-5) 0 0;padding:.65rem .1rem;
+  border:0;border-bottom:2px solid transparent;border-radius:0;background:none;
+  font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+#main_preferences .tabs>label:hover{color:var(--ink);border-bottom-color:var(--line-2)}
+/* `~` first, then `+` — same order upstream relies on, so the adjacent (selected)
+   label wins over the blanket reset. */
+html body #main_preferences .tabs>input:checked~label{
+  color:var(--muted);border-bottom-color:transparent;background:none}
+html body #main_preferences .tabs>input:checked+label{
+  color:var(--accent);border-bottom-color:var(--accent);background:none}
+#main_preferences .tabs>section{border-top:0;padding:var(--sp-6) 0;min-width:0}
+/* the engines table is genuinely wide — let it scroll inside its own panel
+   rather than push the page sideways */
+#tab-content-engines{overflow-x:auto}
+
+/* one form row = label | control | help, on a single baseline */
+#main_preferences fieldset{
+  display:grid;grid-template-columns:15rem minmax(0,17rem) minmax(0,1fr);
+  align-items:center;column-gap:var(--sp-5);row-gap:var(--sp-2);
+  margin:0;padding:var(--sp-4) 0;border:0;border-top:1px solid var(--line)}
+#main_preferences fieldset:first-of-type{border-top:0}
+/* upstream floats these; as grid items the float is ignored (verified: the
+   legend stays a grid item and does not become a "rendered legend") */
+#main_preferences legend{
+  grid-column:1;width:auto;margin:0;padding:0;line-height:1.4;
+  font-family:var(--font-mono);font-size:.78rem;color:var(--ink)}
+#main_preferences .value{grid-column:2;width:auto;margin:0;padding:0}
+/* upstream forces `font-size: inherit !important` here, which lands the control
+   text a step above every label on the page */
+#main_preferences .value select,#main_preferences .value input[type="text"]{
+  width:100%;max-width:100%;margin:0;font-size:.88rem!important}
+/* float:none matters for the .description blocks that sit OUTSIDE a fieldset
+   (the cookies tab notes) — inside one they are grid items and float is already
+   ignored, but upstream floats them right at 50% and they overlap the content. */
+#main_preferences .description{
+  grid-column:3;float:none;width:auto;margin:0;padding:0;max-width:56ch;
+  color:var(--faint);font-size:.82rem;line-height:1.5}
+/* prose blocks on the cookies / special-queries tabs */
+#main_preferences .tabs>section>p,#main_preferences .tabs>section>h4{
+  max-width:var(--measure);margin:0 0 var(--sp-3)}
+#main_preferences .tabs>section>h4{
+  font-family:var(--font-mono);font-size:.78rem;color:var(--ink);margin-top:var(--sp-5)}
+#main_preferences .tabs>section>p{color:var(--muted);font-size:.9rem}
+
+/* section band inside a tab (e.g. "Digital Object Identifier") */
+#main_preferences div.pref-group,#main_preferences tr.pref-group th{
+  background:none;border-top:1px solid var(--line-2);padding:var(--sp-5) 0 var(--sp-2);
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint)}
+
+/* default-categories row — the home chip voice */
+#main_preferences .category{margin:0}
+#main_preferences .category label{
+  padding:.4rem .8rem;border:1px solid var(--line);border-radius:var(--r-pill);
+  background:var(--surface);color:var(--muted);
+  font-family:var(--font-mono);font-size:.74rem;
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease),background var(--dur) var(--ease)}
+#main_preferences .category label:hover{color:var(--ink);border-color:var(--line-2);background:var(--surface-2)}
+#main_preferences .category input[type="checkbox"]:checked+label{
+  color:var(--ink);border:1px solid var(--accent);
+  background:color-mix(in srgb,var(--accent-fill) 16%,var(--surface))}
+/* the categories row is wider than the control column — let it use the help
+   column too, since it has no description of its own */
+#main_preferences fieldset .search_categories{
+  grid-column:2/-1;justify-content:flex-start;margin:0;gap:var(--sp-2)}
+
+/* tables (cookies, engines) */
+#main_preferences table{width:100%;border-collapse:collapse;font-size:.86rem}
+#main_preferences table th,#main_preferences table td{
+  padding:.5rem .6rem;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+#main_preferences table th{
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--faint);font-weight:400}
+#main_preferences table.cookies td{font-family:var(--font-mono);font-size:.8rem;color:var(--muted)}
+#main_preferences table.cookies td:first-child{color:var(--ink)}
+/* severity cells: upstream paints the whole cell with a solid --color-*-background
+   slab, which reads as an error and spends accent on data. Tint + coloured
+   figure instead, using the semantic tokens (never the accent). */
+#main_preferences table td.danger,#main_preferences table td.warning,
+#main_preferences table td.success{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+#main_preferences table td.danger{
+  color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+#main_preferences table td.warning{
+  color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+#main_preferences table td.success{color:var(--ok);background:none}
+/* the support columns are disabled checkboxes used as yes/no marks — "supported"
+   is a positive fact, not an interaction */
+#main_preferences table input[type="checkbox"][disabled]::after{
+  border-left-color:var(--ok);border-bottom-color:var(--ok)}
+
+/* Enable all / Disable all are bulk actions, not primaries */
+#main_preferences .button{
+  padding:.5rem 1rem;border-radius:var(--r-pill);
+  background:var(--surface);border:1px solid var(--line-2);color:var(--muted);
+  font-family:var(--font-mono);font-size:.78rem;
+  transition:color var(--dur) var(--ease),background var(--dur) var(--ease)}
+#main_preferences .button:hover{background:var(--surface-2);color:var(--ink)}
+#main_preferences #toggle-all-engines-container{display:flex;gap:var(--sp-2);margin-bottom:var(--sp-4)}
+#main_preferences .bang{
+  background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);
+  color:var(--muted);font-family:var(--font-mono);font-size:.78rem;padding:.25rem .5rem}
+/* upstream pins this box to `height:1.2em; overflow:hidden` and lets the inner
+   <pre> run to 200em (a deliberate one-line, clipped URL). Style the BOX — any
+   padding on the <pre> pushes the text out of that window and clips it. */
+#main_preferences div.selectable_url{
+  height:auto;line-height:1.5;margin:0;padding:.45rem .6rem;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);
+  color:var(--muted);font-family:var(--font-mono);font-size:.78rem}
+#main_preferences div.selectable_url pre{margin:0;padding:0;font:inherit;color:inherit}
+
+/* footer row — ONE primary (Save); Back/Reset are secondary */
+#main_preferences p.small_font{
+  flex:0 0 100%;margin:0;padding:0;color:var(--faint);font-size:.78rem;line-height:1.5}
+#main_preferences input[type="submit"]{
+  order:1;margin:0 auto 0 0;padding:.6rem 1.4rem;border-radius:var(--r-pill);border:0;
+  background:linear-gradient(160deg,var(--accent-fill),var(--accent-fill-2));color:#fff;
+  font-family:var(--font-mono);font-size:.82rem;cursor:pointer;
+  box-shadow:0 4px 16px var(--glow);transition:filter var(--dur) var(--ease)}
+#main_preferences input[type="submit"]:hover{filter:brightness(1.08)}
+#main_preferences .preferences_back{
+  order:3;float:none;margin:0;padding:0;border-radius:var(--r-pill);
+  background:var(--surface);border:1px solid var(--line-2);
+  transition:border-color var(--dur) var(--ease),background var(--dur) var(--ease)}
+/* DOM order is Reset ▸ Back; show Back nearer the content it returns from */
+#main_preferences div.preferences_back:last-of-type{order:2}
+#main_preferences .preferences_back:hover{background:var(--surface-2);border-color:var(--line-2)}
+#main_preferences .preferences_back a{
+  display:block;padding:.6rem 1.2rem;color:var(--muted);
+  font-family:var(--font-mono);font-size:.82rem}
+#main_preferences .preferences_back:hover a{color:var(--ink)}
+
+/* --- stats / info ------------------------------------------------------ */
+/* NOTE: with no metrics collected yet, upstream's stats.html emits its empty
+   state as a bare text node (no element), so nothing can select it and it sits
+   outside the rail. Left as-is rather than forking that whole table template —
+   an instance with data renders the <table>, which does ride the rail. */
+#main_stats h2,#main_info h2{font-size:1.15rem;margin:var(--sp-6) 0 var(--sp-3)}
+#main_info{padding-bottom:var(--sp-8)}
+#main_info p,#main_info li{color:var(--muted);max-width:var(--measure)}
+#main_info a{color:var(--accent)}
+/* info uses ul.tabs > li > a rather than the radio labels — same tab voice */
+/* no `padding:0` here — that would cancel the rail's padding-inline and leave the
+   tab strip 24px left of the prose it labels */
+#main_info ul.tabs{border-bottom:1px solid var(--line);margin:0 auto var(--sp-5)}
+#main_info ul.tabs>li>a{
+  margin:0 var(--sp-5) 0 0;padding:.65rem .1rem;
+  border:0;border-bottom:2px solid transparent;border-radius:0;background:none;
+  font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+#main_info ul.tabs>li>a:hover{color:var(--ink);border-bottom-color:var(--line-2)}
+#main_info ul.tabs>li>a.active{color:var(--accent);border-bottom-color:var(--accent);background:none}
+#main_info .info-page h1{font-size:1.65rem;font-weight:600;letter-spacing:-.01em;margin:0 0 var(--sp-5)}
+#main_info .info-page h2{font-size:1.15rem;margin:var(--sp-6) 0 var(--sp-3)}
 
 @media (max-width:820px){
   #sidebar{order:-1}
-  .rheader{flex-wrap:wrap}
-  .rheader form{order:3;flex-basis:100%;max-width:none}
-  .rheader .nav-actions{margin-left:auto}
+  .appbar{flex-wrap:wrap}
+  .appbar #search_view{order:3;flex-basis:100%;max-width:none}
+  .appbar-actions{margin-left:auto}
+  .appbar-tabs,.search_filters{padding-left:var(--sp-4);padding-right:var(--sp-4)}
+  /* app pages: the label|control|help row stacks rather than crushing */
+  #main_preferences fieldset{grid-template-columns:minmax(0,1fr);row-gap:var(--sp-2);align-items:start}
+  #main_preferences legend,#main_preferences .value,#main_preferences .description,
+  #main_preferences fieldset .search_categories{grid-column:1}
+  .page_with_header>*:not(.appbar){padding-inline:var(--sp-4)}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}

@@ -6,6 +6,12 @@ services:
     image: searxng-rama:latest
     ports:
       - "8855:8855"
+    environment:
+      # Theme is chosen at deploy time — no script or TUI inside the container.
+      # Variants: rama (default) | google-light | google-dark
+      RAMA_THEME: ${RAMA_THEME:-rama}
+      # Optionally pin the secret key across recreations (otherwise one is
+      # generated per container): SEARXNG_SECRET: "<hex>"
     restart: unless-stopped
 
 networks:
