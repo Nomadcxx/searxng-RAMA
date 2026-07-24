@@ -34,9 +34,9 @@ RUN mkdir -p /opt/searxng-rama \
     && cp -r /build/searxng/searx /opt/searxng-rama/ \
     && cp /build/searxng/requirements.txt /opt/searxng-rama/ \
     && printf '%s\n' \
-       'VERSION_STRING = "1.0.0-RAMA"' \
-       'VERSION_TAG = "1.0.0-RAMA"' \
-       'DOCKER_TAG = "1.0.0-RAMA"' \
+       'VERSION_STRING = "1.1.0-RAMA"' \
+       'VERSION_TAG = "1.1.0-RAMA"' \
+       'DOCKER_TAG = "1.1.0-RAMA"' \
        'GIT_URL = "https://github.com/Nomadcxx/searxng-RAMA"' \
        'GIT_BRANCH = "main"' \
        > /opt/searxng-rama/searx/version_frozen.py
