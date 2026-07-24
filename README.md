@@ -1,14 +1,14 @@
 ![SearXNG RAMA Edition](brand/searxng.png)
 
-SearXNG fork with a redesigned UI and privacy-first defaults out of the box.
+SearXNG fork with a redesigned UI and privacy-first defaults.
 
 ## Features
 
-- Full UI redesign: atmospheric dark home, Google-shaped results rail, workbench preferences (see `design.md` for the locked design system)
-- Three switchable theme variants, all pre-built at install time — **rama** (dark, default), **google-light**, **google-dark**
+- Redesigned UI: atmospheric dark home, Google-shaped results rail, workbench preferences (`design.md` holds the locked design system)
+- Three switchable theme variants, built at install time: **rama** (dark, default), **google-light**, **google-dark**
 - Self-hosted fonts (Inter + JetBrains Mono), no CDN calls
 - Secure defaults: per-machine secret key, hardened systemd unit (`PrivateTmp`, `NoNewPrivileges`)
-- WCAG AA contrast, gated in CI by `docs/redesign/check-contrast.py`
+- WCAG AA contrast on every text/surface pair, enforced by `docs/redesign/check-contrast.py`
 
 <img src="brand/screenshot.png" alt="SearXNG RAMA home" style="width: 100%; border-radius: 8px;"/>
 
@@ -36,8 +36,8 @@ sudo searxng-rama-theme google-dark
 
 ### Docker / Docker Compose
 
-Theme selection is declarative — set `RAMA_THEME` on the container and deploy;
-there is nothing to run inside the container:
+Pick the theme with `RAMA_THEME` when you deploy. The container applies it at
+start:
 
 ```bash
 RAMA_THEME=google-dark docker compose up -d
@@ -46,8 +46,8 @@ docker build -t searxng-rama .
 docker run -d --name searxng-rama -p 8855:8855 -e RAMA_THEME=rama searxng-rama
 ```
 
-Variants: `rama` (default) · `google-light` · `google-dark`. A secret key is
-generated per container unless you pin one with `-e SEARXNG_SECRET=<hex>`.
+Variants: `rama` (default) · `google-light` · `google-dark`. Each container
+generates its own secret key unless you pin one with `-e SEARXNG_SECRET=<hex>`.
 
 ### Debian / Ubuntu / Fedora (bare metal)
 ```bash
@@ -55,7 +55,7 @@ curl -fsSL https://raw.githubusercontent.com/Nomadcxx/searxng-RAMA/main/install.
 ```
 
 The script installs dependencies, builds every theme variant, and launches the
-TUI installer. Re-run the installer any time to **switch theme** or uninstall.
+TUI installer. Re-run the installer to switch theme or uninstall.
 
 ### Manual build
 ```bash
@@ -67,13 +67,13 @@ sudo ./rama-installer
 
 ## Installation details
 
-Everything lands in `/opt/searxng-rama`: a Python virtual environment, the
-SearXNG source with the RAMA theme compiled in, a generated secret key, and a
-systemd service on port 8855. Once done, visit <http://localhost:8855>.
+The installer puts everything in `/opt/searxng-rama`: a Python virtual
+environment, the SearXNG source with the RAMA theme compiled in, a secret key,
+and a systemd service on port 8855. Then visit <http://localhost:8855>.
 
-Theme switching never rebuilds anything — every variant ships as a pre-built
-CSS bundle (`sxng-{ltr,rtl}.<variant>.min.css`) and switching just publishes
-the chosen bundle and restarts the service.
+Each variant ships as a pre-built CSS bundle
+(`sxng-{ltr,rtl}.<variant>.min.css`). Switching copies the chosen bundle over
+the served one and restarts the service; nothing recompiles.
 
 ## Uninstallation
 
@@ -83,6 +83,6 @@ the chosen bundle and restarts the service.
 
 ## Requirements
 
-Handled automatically by each install path. For manual builds: Go ≥ 1.21,
-Node ≥ 20 (distro/NodeSource package — the nodejs.org tarball's npm breaks the
-web build), Python ≥ 3.10.
+Each install path installs its own dependencies. For manual builds: Go ≥ 1.21,
+Node ≥ 20 from a distro or NodeSource package (the nodejs.org tarball's npm
+breaks the web build), Python ≥ 3.10.
