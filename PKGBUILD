@@ -1,7 +1,7 @@
 # Maintainer: Nomadcxx <noovie@gmail.com>
 pkgname=searxng-rama
 _pkgname=searxng
-pkgver=r9624.6da6eee
+pkgver=r9625.ef8f647
 pkgrel=1
 pkgdesc="SearXNG with a modern theme, secure defaults and systemd service"
 arch=('any')
