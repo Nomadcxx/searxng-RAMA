@@ -252,6 +252,11 @@ exec /opt/searxng-rama/venv/bin/python -m searx.webapp "$@"
 EOF
   chmod +x "$pkgdir/usr/bin/searxng-rama-run"
 
+  # Theme switcher: swaps the pre-built variant bundles built above. This is the
+  # supported way to change themes on the AUR install (no TUI is shipped).
+  install -Dm755 "${srcdir}/searxng-RAMA/scripts/searxng-rama-theme" \
+    "$pkgdir/usr/bin/searxng-rama-theme"
+
   # Install systemd service
   msg2 "Installing systemd service..."
   install -dm755 "${pkgdir}/etc/systemd/system"

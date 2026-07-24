@@ -1,0 +1,70 @@
+#!/bin/bash
+# searxng-rama-theme — switch the active theme variant on a bare-metal install.
+#
+# Every variant is pre-built at package/build time as a self-contained CSS
+# bundle (sxng-<side>.<variant>.min.css). "Switching" is just publishing the
+# chosen bundle as the served sxng-<side>.min.css and restarting the service —
+# no node, no LESS, no rebuild.
+#
+# Usage:  sudo searxng-rama-theme            # list variants, show active
+#         sudo searxng-rama-theme rama
+#         sudo searxng-rama-theme google-dark
+set -euo pipefail
+
+INSTALL_PATH="${RAMA_INSTALL_PATH:-/opt/searxng-rama}"
+CSSDIR="$INSTALL_PATH/searx/static/themes/simple"
+SERVICE="searxng-rama"
+
+die() { echo "Error: $*" >&2; exit 1; }
+
+[ -d "$CSSDIR" ] || die "no SearXNG RAMA install at $INSTALL_PATH (set RAMA_INSTALL_PATH to override)"
+
+variants() {
+  for f in "$CSSDIR"/sxng-ltr.*.min.css; do
+    [ -e "$f" ] || continue
+    v="${f##*/sxng-ltr.}"
+    echo "${v%.min.css}"
+  done
+}
+
+active() {
+  for v in $(variants); do
+    if cmp -s "$CSSDIR/sxng-ltr.$v.min.css" "$CSSDIR/sxng-ltr.min.css"; then
+      echo "$v"
+      return
+    fi
+  done
+  echo "unknown"
+}
+
+if [ $# -eq 0 ]; then
+  echo "Available theme variants:"
+  cur="$(active)"
+  for v in $(variants); do
+    if [ "$v" = "$cur" ]; then echo "  * $v (active)"; else echo "    $v"; fi
+  done
+  echo ""
+  echo "Usage: sudo searxng-rama-theme <variant>"
+  exit 0
+fi
+
+choice="$1"
+[ -f "$CSSDIR/sxng-ltr.$choice.min.css" ] || die "unknown variant '$choice' — run with no arguments to list"
+[ "$(id -u)" -eq 0 ] || die "must run as root (sudo) to write $CSSDIR"
+
+for side in ltr rtl; do
+  src="$CSSDIR/sxng-$side.$choice.min.css"
+  [ -f "$src" ] || die "missing bundle $src — the install looks incomplete"
+  cp "$src" "$CSSDIR/sxng-$side.min.css"
+done
+# keep ownership consistent with the rest of the install (service user)
+chown --reference="$CSSDIR" "$CSSDIR/sxng-ltr.min.css" "$CSSDIR/sxng-rtl.min.css" 2>/dev/null || true
+
+echo "Theme set to '$choice'."
+
+if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet "$SERVICE"; then
+  systemctl restart "$SERVICE"
+  echo "Restarted $SERVICE. Hard-refresh your browser (Ctrl+Shift+R) to drop the cached CSS."
+else
+  echo "Note: '$SERVICE' is not running — the new theme applies on next start."
+fi

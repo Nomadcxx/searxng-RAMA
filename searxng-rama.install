@@ -51,6 +51,9 @@ EOF
     echo ""
     echo "Access RAMA Search at http://localhost:8855"
     echo ""
+    echo "To switch theme variant (rama / google-light / google-dark):"
+    echo "  sudo searxng-rama-theme <variant>"
+    echo ""
 }
 
 post_upgrade() {
@@ -81,6 +84,10 @@ post_upgrade() {
     echo "Your configuration at /opt/searxng-rama/searx/settings.yml is preserved."
     echo "To apply changes:"
     echo "  sudo systemctl restart searxng-rama.service"
+    echo ""
+    echo "NOTE: upgrades reset the active theme to 'rama' (the served CSS is a"
+    echo "package file). If you had switched variants, re-apply with:"
+    echo "  sudo searxng-rama-theme <variant>"
     echo ""
 }
 

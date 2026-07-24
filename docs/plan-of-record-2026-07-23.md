@@ -19,7 +19,16 @@
 
 **Bugs E2E caught & fixed:** `gen-variant.py` not copied into `$srcdir` (theme loop copies dirs only); Node floor (Debian ships 18); nodejs.org tarball npm skips rolldown's native binding → use NodeSource.
 
-**Open:** ship `rama-installer` in the AUR package so AUR users can reach Switch-Theme/Uninstall (currently only the cross-distro path builds it). Then: push `dev`, regen `.SRCINFO`, merge to `main`, AUR push.
+**Theme distribution per channel (decided 2026-07-24 — supersedes the earlier
+"ship `rama-installer` in the AUR package" idea):**
+- **AUR** — no TUI in the package. Ships the RAMA variant active + all pre-built
+  bundles, plus `searxng-rama-theme` (shell) to swap them. Uninstall = pacman.
+- **Docker** — declarative via `RAMA_THEME` env (entrypoint publishes the chosen
+  bundle at container start); nothing to run inside the container.
+- **Bare metal (Debian/Ubuntu/Fedora)** — `install.sh` + the Go TUI keeps
+  Switch-Theme/Uninstall modes.
+
+**Open:** push `dev`, regen `.SRCINFO`, merge to `main`, AUR push.
 
 ---
 
