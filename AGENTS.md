@@ -28,8 +28,9 @@ SearXNG Python source** — it themes and packages upstream
 
 ## Hard rules (enforced or learned the hard way)
 
-1. **Commit messages must not contain AI/agent attribution** — a repo hook
-   rejects them (no `Co-Authored-By: Claude`, etc.).
+1. **Commit messages must not name coding assistants or tooling attribution**
+   — a commit-msg hook rejects them, and it matches loose substrings (even
+   words like "both" trip it). No `Co-Authored-By` trailers for tools.
 2. **Every new coloured text/surface pair** goes into
    `docs/redesign/check-contrast.py` and must pass (WCAG AA) before commit.
 3. **Style the real DOM** — upstream ships ion-icons, checkbox-categories,
