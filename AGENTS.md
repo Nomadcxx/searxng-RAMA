@@ -2,301 +2,124 @@
 
 ## Repository Overview
 
-This is a Go-based installer and custom theme packaging for SearXNG. The project:
-- **Primary language**: Go (installer) + Python (SearXNG runtime)
-- **Purpose**: Builds a TUI installer for a customized SearXNG instance with RAMA theme
-- **Main component**: `cmd/rama-installer/main.go` - Terminal UI installer
-- **Packaging**: Arch Linux AUR package (PKGBUILD)
+Custom theme + packaging/distribution for SearXNG. **This repo contains no
+SearXNG Python source** — it themes and packages upstream
+(github.com/searxng/searxng), cloned at build time.
 
-## Build & Development Commands
+- **Design system**: `design.md` at the repo root is **locked and
+  authoritative**. Read it before any UI work; extend it rather than
+  regenerating it.
+- **Theme model**: LESS is compiled **once at build time by vite** — there is
+  no runtime LESS compilation. Every switchable variant (rama, google-light,
+  google-dark) is pre-built into a self-contained bundle
+  (`sxng-{ltr,rtl}.<variant>.min.css`); "switching theme" always means
+  publishing one of those bundles as the served `sxng-{ltr,rtl}.min.css` and
+  restarting the service.
+- **Canonical theme build**: `scripts/build-themes.sh <searxng-checkout>
+  <rama-repo>`. The PKGBUILD inlines the same steps — keep them in sync.
 
-### Core Build Commands
+## Distribution channels (decided; do not re-litigate silently)
+
+| Channel | Install | Theme switching |
+|---|---|---|
+| AUR (`searxng-rama`) | PKGBUILD, pre-built bundles in the package | `searxng-rama-theme` shell script (no TUI is shipped) |
+| Docker | multi-stage Dockerfile (classic-builder compatible — **no BuildKit-only syntax** like `COPY --chmod`) | `RAMA_THEME` env, applied by `scripts/docker-entrypoint.sh` |
+| Debian/Ubuntu/Fedora | `install.sh` → Go TUI (`cmd/rama-installer`) | TUI Switch-Theme mode |
+
+## Hard rules (enforced or learned the hard way)
+
+1. **Commit messages must not contain AI/agent attribution** — a repo hook
+   rejects them (no `Co-Authored-By: Claude`, etc.).
+2. **Every new coloured text/surface pair** goes into
+   `docs/redesign/check-contrast.py` and must pass (WCAG AA) before commit.
+3. **Style the real DOM** — upstream ships ion-icons, checkbox-categories,
+   `hide_if_nojs`/`show_if_nojs` spans. Never style idealised markup.
+4. **Node must come from a distro/NodeSource package.** The nodejs.org
+   tarball's npm silently skips rolldown's native binding and the web build
+   fails at runtime. Node ≥ 20 required.
+5. **Never generate the secret key at package/image build time** — per-machine
+   in `post_install` (AUR), per-container in the entrypoint (Docker).
+6. The systemd unit needs `PrivateTmp=true` — SearXNG caches SQLite DBs in
+   /tmp and collides with other users' files without it.
+7. Changes to the shared theme layer (`theme/rama/rama.less`) land on **all
+   three variants** — verify each.
+
+## Build & test commands
+
 ```bash
-# Build the RAMA installer
+# Theme (all variants) into a searxng checkout
+bash scripts/build-themes.sh /path/to/searxng /path/to/searxng-RAMA
+
+# Contrast gate (must pass before committing colour changes)
+python3 docs/redesign/check-contrast.py
+
+# Go TUI installer
 go build -o rama-installer ./cmd/rama-installer/
 
-# One-line installer (full workflow)
-curl -fsSL https://raw.githubusercontent.com/Nomadcxx/searxng-RAMA/main/install.sh | sudo bash
+# AUR package gate — build from a clean dir before any AUR push
+mkdir /tmp/pkgtest && cp PKGBUILD searxng-rama.install /tmp/pkgtest && \
+  cd /tmp/pkgtest && makepkg -f && makepkg --printsrcinfo > .SRCINFO
 
-# Manual install process
-1. Build: go build -o rama-installer ./cmd/rama-installer/
-2. Run: sudo ./rama-installer
-```
+# Docker (verify BOTH builders — users run the classic one too)
+docker build -t searxng-rama:test .
+DOCKER_BUILDKIT=0 docker build -t searxng-rama:classic .
 
-### Go Dependencies
-```bash
-# Install dependencies
-go mod download
-
-# Clean dependencies
-go mod tidy
-
-# Vendor dependencies (if needed)
-go mod vendor
-```
-
-### Testing Commands
-**Note**: This repository doesn't contain Go test files. Testing is primarily through:
-- Manual installer testing
-- AUR package testing via `makepkg`
-- Systematic installer flow verification
-
-### Packaging & Release
-```bash
-# Build Arch Linux package
-makepkg -si
-
-# Clean package build
-makepkg --cleanbuild
-
-# Check package validity
-namcap PKGBUILD
-```
-
-## Code Style & Conventions
-
-### Go Code Style
-Based on the existing `cmd/rama-installer/main.go`:
-
-#### Import Organization
-```go
-// Standard library imports first, then external packages
-import (
-    "fmt"
-    "os"
-    "os/exec"
-    // ... other stdlib
-
-    "github.com/charmbracelet/bubbles/spinner"
-    tea "github.com/charmbracelet/bubbletea"
-    "github.com/charmbracelet/lipgloss"
-)
-```
-
-#### Naming Conventions
-- **Exported identifiers**: PascalCase (`type InstallTask struct`, `func NewModel()`)
-- **Private identifiers**: camelCase (`var installTasks []installTask`, `func executeTask()`)
-- **Constants**: UPPER_SNAKE_CASE (`const DefaultInstallPath = "/opt/searxng-rama"`)
-- **Error variables**: prefix with `Err` (`var ErrInvalidPath = errors.New("invalid path")`)
-
-#### Error Handling
-```go
-// Standard Go error checking
-if err != nil {
-    return fmt.Errorf("create install directory: %w", err)  // Wrap with context
-}
-
-// For optional steps that can fail
-if m.tasks[index].optional {
-    m.tasks[index].status = statusSkipped
-}
-```
-
-#### Comments & Documentation
-- **Package comments**: Brief description at top of file
-- **Function comments**: Use complete sentences starting with function name
-- **Complex logic**: Add explanatory comments
-- **Public API**: Full godoc documentation
-
-#### Type Definitions
-```go
-// Use clear, descriptive type names
-type installTask struct {
-    name        string
-    description string
-    execute     func(*model) error
-    optional    bool
-    status      taskStatus
-}
-
-// Constants for state management
-const (
-    stepWelcome installStep = iota
-    stepInstalling
-    stepComplete
-)
-```
-
-#### Variable Declarations
-```go
-// Group related variables
-var (
-    BgBase       = lipgloss.Color("#2b2d42")
-    Primary      = lipgloss.Color("#edf2f4")
-    Accent       = lipgloss.Color("#ef233c")
-)
-
-// Function-local variables with clear names
-installPath := defaultInstallPath
-user := defaultUser
-```
-
-### Shell Script Style (`install.sh`, `scripts/*.sh`)
-```bash
-#!/bin/bash
-# Script header with purpose and usage
-
-set -e  # Exit on error
-
-# Functions use snake_case
-check_privileges() {
-    if [ "$EUID" -ne 0 ]; then
-        echo "Error: This script must be run as root"
-        exit 1
-    fi
-}
-
-# Clear variable naming
-INSTALL_PATH="/opt/searxng-rama"
-SOURCE_PATH="/home/nomadx/searxng-custom"
-
-# Use double quotes for variable expansion
-echo "Installing to $INSTALL_PATH"
-```
-
-### Python Code (SearXNG dependencies)
-This project packages SearXNG Python code but doesn't directly contain Python source. Style follows:
-- SearXNG's existing Python conventions
-- PEP 8 when modifying or adding Python code
-
-## Quality Assurance
-
-### Pre-commit Hooks
-```bash
-# Install pre-commit
-pre-commit install
-
-# Run all hooks
+# Quality
 pre-commit run --all-files
-
-# Run specific hook
-pre-commit run check-ai-content
-pre-commit run check-secrets
-```
-
-### Linting & Formatting
-**Go**:
-```bash
-# Format code
-go fmt ./...
-
-# Vet code
+shellcheck install.sh scripts/*.sh
 go vet ./...
 ```
 
-**Shell**:
-```bash
-# Use shellcheck for bash scripts
-shellcheck install.sh scripts/*.sh
-```
+## File organization
 
-### Security Checks
-- **Secrets**: `scripts/check-secrets.sh` checks for hardcoded credentials
-- **AI content**: `scripts/check-ai-content.sh` identifies AI-generated documentation
-- **Default secrets**: Always use placeholder secrets (`ultrasecretkey`) replaced at install time
-
-## Project Structure Conventions
-
-### File Organization
 ```
 /
-├── cmd/rama-installer/     # Go installer source
-├── theme/rama/             # RAMA theme files (Less/CSS)
-├── assets/                 # Branding assets (logos, icons)
-├── brand/                  # Screenshots and branding
-├── scripts/                # Utility and verification scripts
-├── docs/                   # Documentation
-└── .pre-commit-config.yaml # Quality hooks
+├── design.md               # LOCKED design system — read before UI work
+├── theme/rama/             # palette (definitions.less) + shared layout layer (rama.less)
+│   └── templates/          # forked simple-theme templates (index, search, results, page_with_header)
+├── theme/google/           # google-light/dark palette variants
+├── theme/gen-variant.py    # flattens a variant palette for pre-building
+├── scripts/build-themes.sh # canonical theme build (all variants)
+├── scripts/searxng-rama-theme    # AUR/bare-metal theme switcher (ships in package)
+├── scripts/docker-entrypoint.sh  # container start: RAMA_THEME + secret key
+├── cmd/rama-installer/     # Go TUI (bare-metal channel only)
+├── PKGBUILD + searxng-rama-*.install  # AUR packaging
+├── Dockerfile + docker-compose.yaml   # container channel
+├── install.sh              # cross-distro bootstrap (Debian/Ubuntu/Fedora)
+└── docs/                   # plan-of-record, redesign spec, contrast gate
 ```
 
-### Naming Files
-- **Go files**: `camelCase.go` for main files, `snake_case_test.go` for tests (if added)
-- **Scripts**: `kebab-case.sh` or `snake_case.sh`
-- **Configuration**: `kebab-case.yml` or `PascalCase.config`
-- **Theme files**: Follow Less CSS conventions
+## Go code style (`cmd/rama-installer`)
 
-## Development Workflow
+- Standard library imports first, then external (bubbletea/lipgloss).
+- Exported PascalCase, private camelCase; wrap errors with context
+  (`fmt.Errorf("create install directory: %w", err)`).
+- Each `installTask` is atomic and idempotent; keep the TUI state transitions
+  (welcome → installing → complete) intact.
 
-### Adding Features
-1. **Understand scope**: This is an installer, not the SearXNG application itself
-2. **Modify installer**: Add tasks to `cmd/rama-installer/main.go`
-3. **Test flow**: Build and test installer manually
-4. **Update packaging**: Modify PKGBUILD if installation process changes
-5. **Verify pre-commit**: Run hooks before committing
+## Shell style (`install.sh`, `scripts/*`)
 
-### Debugging
-```bash
-# Build with debug symbols
-go build -gcflags="all=-N -l" -o rama-installer ./cmd/rama-installer/
+`set -euo pipefail`, snake_case functions, double-quoted expansions. Scripts
+must not assume this maintainer's paths — use env overrides
+(`RAMA_INSTALL_PATH`, `RAMA_SOURCE_PATH`) with sane defaults.
 
-# Run with strace for system calls
-strace -f -o installer.log ./rama-installer
-```
+## Release checklist
 
-### Performance
-- Installer should complete within 1-2 minutes
-- Optimize file copying and Python venv creation
-- Use concurrent operations where safe
+1. Work lands on `dev`; E2E-verify locally (theme build, live render,
+   contrast gate).
+2. Merge `dev` → `main`, push both.
+3. **Gate**: clean-dir `makepkg` from the pushed `main` must succeed; inspect
+   package contents (variant bundles, served CSS == rama bundle, placeholder
+   secret intact, `/usr/bin/searxng-rama-theme` present).
+4. Regenerate `.SRCINFO` from the gate build; sync `pkgver` back to the repo.
+5. Tag (`vX.Y.Z`), push tag. Bump the frozen `X.Y.Z-RAMA` version strings in
+   PKGBUILD + Dockerfile with it.
+6. Copy `PKGBUILD`, `.SRCINFO`, `searxng-rama.install` into the AUR clone
+   (`~/aur-searxng-rama`), commit, push.
 
-## Agent-Specific Guidelines
+## Security
 
-### For AI Coding Agents
-1. **Preserve installer flow**: The TUI has specific state transitions (welcome → installing → complete)
-2. **Keep tasks atomic**: Each `installTask` should do one specific thing
-3. **Error handling**: Always provide clear error messages for debugging
-4. **User experience**: Installer should be informative but not overwhelming
-
-### When Modifying
-- **Theme changes**: Update `theme/rama/definitions.less` and rebuild via PKGBUILD
-- **Installer logic**: Add new `installTask` entries with clear `execute` functions
-- **Configuration**: Defaults are in `settings.yml` template, modified at install time
-
-### Security Considerations
-- Never commit actual secrets (use placeholders)
-- Validate user input in installer
-- Ensure proper permissions (use `searxng` user)
-- Generate secure random keys at installation
-
-## CI/CD & Automation
-
-This project currently uses:
-- **Pre-commit hooks**: Local quality gates
-- **Manual testing**: AUR package validation
-- **User testing**: Community feedback via GitHub issues
-
-Potential future additions:
-- GitHub Actions for automated builds
-- Integration tests for installer flow
-- Package testing in clean environments
-
----
-
-## Quick Reference
-
-### Essential Commands
-```bash
-# Build and test
-go build -o rama-installer ./cmd/rama-installer/
-./rama-installer
-
-# Quality checks
-pre-commit run --all-files
-shellcheck install.sh
-
-# Packaging
-makepkg -si
-```
-
-### Code Patterns to Follow
-- **Error handling**: Always wrap errors with context
-- **Task design**: Each installer task should be independent and idempotent
-- **User feedback**: Clear progress indicators in TUI
-## **Disclaimer**
-
-This is an installer project. The actual SearXNG Python code is a submodule/dependency. Changes to SearXNG itself should be made upstream or through theme customization only.
-```
-
-### Maintainer Notes
-Last updated: $(date +%Y-%m-%d)
-Repository: https://github.com/Nomadcxx/searxng-RAMA
-Primary language: Go (installer) + Python (runtime)
+- Placeholder secrets only in the repo (`ultrasecretkey`).
+- `scripts/check-secrets.sh` and `scripts/check-ai-content.sh` run in
+  pre-commit.
+- Service runs as the `searxng` user; container runs non-root.

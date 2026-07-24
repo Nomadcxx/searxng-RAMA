@@ -64,8 +64,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --system --home-dir /opt/searxng-rama --shell /usr/sbin/nologin searxng
 
+# NOTE: no BuildKit-only syntax here (e.g. COPY --chmod) — the image must also
+# build on the classic builder. COPY --from / --chown are classic-safe.
 COPY --from=builder --chown=searxng:searxng /opt/searxng-rama /opt/searxng-rama
-COPY --chown=root:root --chmod=755 scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod 755 /usr/local/bin/docker-entrypoint.sh
 
 ENV SEARXNG_SETTINGS_PATH=/opt/searxng-rama/searx/settings.yml
 # rama | google-light | google-dark

@@ -118,13 +118,12 @@ git clone --depth 1 "$SEARXNG_REPO" searxng
 echo "Building the RAMA theme (compiles CSS for every variant; may take a few minutes)..."
 if ! bash rama/scripts/build-themes.sh "$TMP/searxng" "$TMP/rama"; then
   echo "" >&2
-  echo "ERROR: the SearXNG web build failed. This usually means the distribution is" >&2
-  echo "too old for SearXNG's current toolchain — its prebuilt bundler binding needs a" >&2
-  echo "newer glibc than, e.g., Debian 12 provides." >&2
+  echo "ERROR: the SearXNG web build failed. Most common cause: a Node.js not" >&2
+  echo "installed from a distro/NodeSource package (the nodejs.org tarball's npm" >&2
+  echo "silently skips the bundler's native binding)." >&2
   echo "" >&2
-  echo "Recommended instead:" >&2
-  echo "  - Container image (works anywhere):  docker compose up" >&2
-  echo "  - Or a newer release: Ubuntu 24.04+, Fedora 40+, Debian 13+." >&2
+  echo "Verified working: Debian 12+, Ubuntu 24.04+, Fedora 40+ with the Node 20" >&2
+  echo "this script installs. Fallback that works anywhere:  docker compose up" >&2
   exit 1
 fi
 
