@@ -123,6 +123,15 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease)}
 .appbar-tabs .category label:hover{color:var(--ink)}
 .appbar-tabs .category input:checked+label{color:var(--accent);border-bottom-color:var(--accent)}
+/* the no-JS / search_on_category_select markup renders <button.category_button>
+   instead of checkbox+label — mirror the tab voice onto the real DOM (rule #3). */
+.appbar-tabs .category_button{
+  gap:.4rem;padding:.55rem .15rem;border-bottom:2px solid transparent;background:none;
+  color:var(--muted);font-family:var(--font-mono);font-size:.78rem;text-transform:none;
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+.appbar-tabs .category_button svg{padding:0;width:14px;height:14px;stroke:currentColor}
+.appbar-tabs .category_button:hover{color:var(--ink)}
+.appbar-tabs .category_button.selected,.appbar-tabs .category_button:active{color:var(--accent);border-bottom-color:var(--accent)}
 .hint{margin-top:var(--sp-6);font-family:var(--font-mono);font-size:.72rem;color:var(--faint)}
 /* always-reachable settings on the home view */
 .home-settings{
@@ -187,6 +196,12 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
    wraps the gallery in #urls; our column-flex rail default would stack tiles
    vertically full-width. Row direction restores the upstream masonry flow. */
 #results.only_template_images>#urls{flex-direction:row}
+/* Broken thumbnails: browsers paint the alt text at the img's own size and
+   colour, so a failed tile became a full-width accent-pink text row. Cap the
+   box to a tile and degrade to a neutral placeholder. */
+article.result-images img.image_thumbnail{
+  max-width:min(100%,340px);overflow:hidden;
+  color:var(--muted);font-size:.72rem;background:var(--surface-2)}
 
 /* ONE LEFT EDGE (design.md non-negotiable #2). Upstream floats a.thumbnail_link
    left, so the snippet wraps underneath the image and the column goes ragged.
@@ -246,6 +261,10 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   margin:.2rem 0 .5rem;font-size:1.05rem;color:var(--ink);font-weight:600}
 #sidebar p{margin:0 0 .6rem;color:var(--muted);font-size:.88rem}
 #sidebar a{color:var(--accent)}
+/* infobox source links: real markup is .infobox .urls > ul > li.url — kill the
+   default disc so the link reads as a row, not a stray bullet */
+#sidebar .infobox .urls ul{list-style:none;margin:.6rem 0 0;padding:0}
+#sidebar .infobox .urls a{font-family:var(--font-mono);font-size:.8rem}
 #sidebar table{width:100%;border-collapse:collapse;font-size:.85rem}
 #sidebar td,#sidebar th{padding:.35rem 0;border-top:1px solid var(--line);text-align:left;color:var(--muted);font-weight:400}
 
@@ -257,6 +276,16 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   transition:all var(--dur) var(--ease);font-variant-numeric:tabular-nums}
 #pagination .page_number:hover{color:var(--ink);border-color:var(--line-2)}
 #pagination .page_number_current{background:linear-gradient(160deg,var(--accent-fill),var(--accent-fill-2));color:#fff;border-color:transparent}
+
+/* no-results panel: upstream paints .dialog-error-block as a solid crimson
+   slab — half the viewport in fill, links unreadable. design.md: fills are for
+   CTAs and current state, not messaging. Surface card, bad-colour heading. */
+#main_results .dialog-error-block{
+  background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-md);
+  color:var(--muted);padding:var(--sp-5);margin:var(--sp-4) 0}
+#main_results .dialog-error-block strong{color:var(--bad);font-size:1.05rem}
+#main_results .dialog-error-block a{color:var(--accent)}
+#main_results .dialog-error-block ul{margin:.4rem 0 0;padding-left:1.2rem}
 
 /* reveal on load */
 /* No entrance animation on results. A reveal that starts at opacity:0 (with
@@ -403,6 +432,24 @@ html body #main_preferences .tabs>input:checked+label{
   font-family:var(--font-mono);font-size:.78rem;
   transition:color var(--dur) var(--ease),background var(--dur) var(--ease)}
 #main_preferences .button:hover{background:var(--surface-2);color:var(--ink)}
+
+/* on/off switch — upstream hangs a 1.875em knob off a 0.7em track whose token
+   colour equals the card surface, so it reads as floating glyphs. Solid track,
+   centred knob; the existing mark tokens (crimson on / faint off) stay. */
+input.checkbox-onoff[type="checkbox"]{
+  width:2.9em;height:1.5em;margin:0;border-radius:var(--r-pill);
+  transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+input.checkbox-onoff[type="checkbox"]::before{
+  top:50%;left:.1em;transform:translateY(-50%);width:1.45em;height:1.45em;font-size:.72em}
+input.checkbox-onoff[type="checkbox"]:checked::before,
+input.checkbox-onoff.reversed-checkbox[type="checkbox"]::before{left:auto;right:.1em}
+input.checkbox-onoff.reversed-checkbox[type="checkbox"]:checked::before{left:.1em;right:auto}
+input.checkbox-onoff[type="checkbox"],
+input.checkbox-onoff.reversed-checkbox[type="checkbox"]:checked{
+  background:var(--surface-2);border:1px solid var(--line-2)}
+input.checkbox-onoff[type="checkbox"]:checked,
+input.checkbox-onoff.reversed-checkbox[type="checkbox"]{
+  background:color-mix(in srgb,var(--accent-fill) 28%,var(--surface));border:1px solid var(--accent-fill)}
 #main_preferences #toggle-all-engines-container{display:flex;gap:var(--sp-2);margin-bottom:var(--sp-4)}
 #main_preferences .bang{
   background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);
@@ -462,7 +509,12 @@ html body #main_preferences .tabs>input:checked+label{
 #main_info .info-page h2{font-size:1.15rem;margin:var(--sp-6) 0 var(--sp-3)}
 
 @media (max-width:820px){
-  #sidebar{order:-1}
+  /* upstream collapses #results to one column here; our explicit desktop
+     placements would pin #sidebar into an implicit 0-width column (clipped
+     infobox). `order` does nothing on grid items — re-place instead:
+     single column, DOM order (infobox above results, as upstream mobile). */
+  #results{grid-template-columns:minmax(0,1fr)}
+  #results>#urls,#results>#sidebar{grid-column:1;grid-row:auto}
   .appbar{flex-wrap:wrap}
   .appbar #search_view{order:3;flex-basis:100%;max-width:none}
   .appbar-actions{margin-left:auto}
