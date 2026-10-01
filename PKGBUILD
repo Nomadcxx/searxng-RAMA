@@ -196,10 +196,8 @@ package() {
     fi
   done
 
-  # Copy .git directory for version info
-  if [ -d ".git" ]; then
-    cp -r .git "$pkgdir/opt/searxng-rama/"
-  fi
+  # version_frozen.py (written in build()) pins the version — shipping .git
+  # into /opt only bloated the package and contradicted the plan-of-record.
 
   # RAMA assets already copied to source in build() and compiled by vite
 
