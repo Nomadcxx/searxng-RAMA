@@ -22,8 +22,10 @@ rama_version="$(tr -d '[:space:]' < "$RAMA/VERSION")"
 [ -n "$rama_version" ] || { echo "ERROR: $RAMA/VERSION is empty" >&2; exit 1; }
 
 # mirrors upstream searx/version.py get_git_version(): Y.M.D with the leading
-# zeros dropped, '+', short hash — e.g. 2026.10.2+19ffbcd30
-upstream="$(git -C "$SXNG" show -s --date='format:%Y.%m.%d' --format='%cd+%h' | sed 's/\.0/./g')"
+# zeros dropped, '+', short hash — e.g. 2026.10.2+19ffbcd30. The hash length is
+# pinned: git sizes %h to the clone, so the shallow Docker/install.sh clones
+# printed 7 chars and the full AUR clone 9 for the same commit.
+upstream="$(git -C "$SXNG" -c core.abbrev=9 show -s --date='format:%Y.%m.%d' --format='%cd+%h' | sed 's/\.0/./g')"
 [ -n "$upstream" ] || { echo "ERROR: could not read upstream commit from $SXNG" >&2; exit 1; }
 
 cat > "$SXNG/searx/version_frozen.py" <<EOF
