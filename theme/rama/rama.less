@@ -84,7 +84,9 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
    only and centre it — no phantom label width. */
 #clear_search{width:40px;height:40px;border-radius:50%;color:var(--muted);display:grid;place-items:center;flex:0 0 auto;padding:0}
 #clear_search:hover{background:var(--surface-2);color:var(--ink)}
-#clear_search .hide_if_nojs{display:grid;place-items:center;line-height:0}
+/* the icon's wrapper is a bare <span> (upstream moved .hide_if_nojs onto the
+   button itself) — as an inline line box it dropped the icon 5.6px low */
+#clear_search>span{display:grid;place-items:center;line-height:0}
 #clear_search .show_if_nojs{display:none}
 #clear_search svg,#clear_search .ionicon{width:16px;height:16px}
 /* upstream drops the outline on the search-box buttons; design.md wants an
@@ -100,6 +102,23 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 #send_search .hide_if_nojs{display:grid;place-items:center;line-height:0}
 #send_search .show_if_nojs{display:none}
 #send_search svg,#send_search .ionicon{width:20px;height:20px}
+
+/* autocomplete — real markup: .search_box > div.autocomplete(.open) > ul > li
+   (li.active = keyboard selection). Upstream gives it no top/left: it sits at
+   its STATIC position plus a 3.5rem margin. Inside our centred flex .search_box
+   that static position is vertically centred, so the open panel covered the
+   field (and ran off-screen above the sticky bar). Anchor it explicitly: flush
+   under the box, same width, scrolls rather than overflowing the viewport. */
+/* insets measure from the padding box: -1px cancels .search_box's 1px border so
+   the panel's edges line up with the bar's */
+.search_box .autocomplete{top:calc(100% + var(--sp-2));left:-1px;right:-1px;width:auto;max-width:none;margin:0}
+.search_box .autocomplete.open{
+  margin:0;max-height:min(24rem,55vh);padding:var(--sp-1) 0;
+  background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:var(--r-md);
+  box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.search_box .autocomplete>ul>li{padding:.5rem 1.15rem;font-size:.95rem;line-height:1.4}
+.appbar .search_box .autocomplete>ul>li{padding-inline:.9rem} /* line up with the bar's input text */
+.search_box .autocomplete>ul>li.active,.search_box .autocomplete>ul>li:hover{background:var(--surface-2);color:var(--ink)}
 
 /* categories — real classes: .search_categories .category .category_name */
 .search_categories{display:flex;flex-wrap:wrap;gap:var(--sp-2);justify-content:center;margin-top:var(--sp-5)}
@@ -210,6 +229,11 @@ html .search_filters select,html #main_preferences select:not([multiple]){
 /* a native select sizes to its LONGEST option (language names), not the chosen
    one — cap it so "Auto-detect" isn't a 290px box */
 html .search_filters select{background-color:var(--surface);color:var(--muted);font-family:var(--font-mono);font-size:.78rem;width:auto;max-width:min(100%,15rem);text-overflow:ellipsis}
+/* upstream's toolkit `select` carries z-index:100 and `padding:.2rem!important`.
+   As flex items the filters then stack above the sticky app bar (z 20) — they
+   painted over the open autocomplete panel — and the !important padding ate the
+   room reserved for the chevron. */
+html .search_filters select{z-index:auto;padding:.3rem 2rem .3rem .65rem!important}
 html .search_filters select:hover{border-color:var(--line-2);color:var(--ink)}
 
 /* result rows — real classes: article.result .url_header .url_wrapper h3 .content .engines */
@@ -629,6 +653,19 @@ input.checkbox-onoff[type="checkbox"]:focus-visible{outline:2px solid var(--acce
   #main_preferences fieldset .search_categories{grid-column:1}
   .page_with_header>*:not(.appbar){padding-inline:var(--sp-4)}
 }
+/* upstream phone "focus mode" (@phone = 50em): a focused #search_view becomes an
+   absolute overlay and `.search_box *` loses every border, radius and shadow.
+   Our layout already gives the field the full width; in it the overlay only
+   covered the hero (a grey block over the lockup) and flattened the
+   suggestions panel. Neutralise it and restore the shapes, at upstream's weight. */
+@media screen and (max-width:50em){
+  #search_view:focus-within{position:static;height:auto;width:auto;background:none;z-index:auto}
+  #search_view:focus-within .search_box{border:1px solid var(--accent);border-radius:var(--r-pill);box-shadow:0 0 0 4px var(--glow)}
+  .appbar #search_view:focus-within .search_box{border-radius:var(--r-md);box-shadow:0 0 0 3px var(--glow)}
+  #search_view:focus-within .search_box #send_search{border-radius:var(--r-pill);box-shadow:0 4px 16px var(--glow)}
+  #search_view:focus-within .search_box #clear_search{border-radius:50%}
+  #search_view:focus-within .search_box .autocomplete.open{border:1px solid var(--line-2);border-radius:var(--r-md);box-shadow:0 12px 32px rgba(0,0,0,.28)}
+}
 /* iOS Safari zooms the whole page when a field under 16px takes focus */
 @media (pointer:coarse){
   .appbar #q,html .search_filters select{font-size:1rem}
@@ -637,6 +674,8 @@ input.checkbox-onoff[type="checkbox"]:focus-visible{outline:2px solid var(--acce
   html .search_filters select{font-family:var(--font-ui)}
   .search_filters{gap:var(--sp-2)}
   #main_preferences .value select,#main_preferences .value input[type="text"]{font-size:1rem!important}
+  /* suggestions are tap targets: 44px rows */
+  .search_box .autocomplete>ul>li{padding-block:.7rem}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
