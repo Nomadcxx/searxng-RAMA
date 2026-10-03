@@ -80,7 +80,9 @@ go vet ./...
 │   └── templates/          # forked simple-theme templates (index, search, results, page_with_header)
 ├── theme/google/           # google-light/dark palette variants
 ├── theme/gen-variant.py    # flattens a variant palette for pre-building
+├── VERSION                 # the RAMA release number — single source
 ├── scripts/build-themes.sh # canonical theme build (all variants)
+├── scripts/freeze-version.sh     # stamps upstream commit + VERSION into searx (all channels)
 ├── scripts/searxng-rama-theme    # AUR/bare-metal theme switcher (ships in package)
 ├── scripts/docker-entrypoint.sh  # container start: RAMA_THEME + secret key
 ├── cmd/rama-installer/     # Go TUI (bare-metal channel only)
@@ -113,8 +115,9 @@ must not assume this maintainer's paths — use env overrides
    package contents (variant bundles, served CSS == rama bundle, placeholder
    secret intact, `/usr/bin/searxng-rama-theme` present).
 4. Regenerate `.SRCINFO` from the gate build; sync `pkgver` back to the repo.
-5. Tag (`vX.Y.Z`), push tag. Bump the frozen `X.Y.Z-RAMA` version strings in
-   PKGBUILD + Dockerfile with it.
+5. Tag (`vX.Y.Z`), push tag. The release number lives **only** in `VERSION`
+   (bump it before the gate build); `scripts/freeze-version.sh` stamps it, with
+   the upstream commit, into every channel's `version_frozen.py`.
 6. Copy `PKGBUILD`, `.SRCINFO`, `searxng-rama.install` into the AUR clone
    (`~/aur-searxng-rama`), commit, push.
 

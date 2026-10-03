@@ -28,18 +28,14 @@ COPY . /build/rama
 # build every theme variant's CSS, install fonts, apply template forks/branding
 RUN bash /build/rama/scripts/build-themes.sh /build/searxng /build/rama
 
-# assemble the install tree. version_frozen pins the version so searx never
-# shells out to git at import time (the runtime image has neither git nor .git)
+# pin the reported version (upstream commit + RAMA release) while the checkout
+# still has .git — the runtime image has neither git nor .git
+RUN bash /build/rama/scripts/freeze-version.sh /build/searxng /build/rama
+
+# assemble the install tree
 RUN mkdir -p /opt/searxng-rama \
     && cp -r /build/searxng/searx /opt/searxng-rama/ \
-    && cp /build/searxng/requirements.txt /opt/searxng-rama/ \
-    && printf '%s\n' \
-       'VERSION_STRING = "1.1.1-RAMA"' \
-       'VERSION_TAG = "1.1.1-RAMA"' \
-       'DOCKER_TAG = "1.1.1-RAMA"' \
-       'GIT_URL = "https://github.com/Nomadcxx/searxng-RAMA"' \
-       'GIT_BRANCH = "main"' \
-       > /opt/searxng-rama/searx/version_frozen.py
+    && cp /build/searxng/requirements.txt /opt/searxng-rama/
 
 # venv + python deps
 RUN python3 -m venv /opt/searxng-rama/venv \

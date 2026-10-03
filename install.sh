@@ -127,6 +127,9 @@ if ! bash rama/scripts/build-themes.sh "$TMP/searxng" "$TMP/rama"; then
   exit 1
 fi
 
+# record the upstream commit + RAMA release the instance will report
+bash rama/scripts/freeze-version.sh "$TMP/searxng" "$TMP/rama"
+
 echo "Building the installer..."
 ( cd rama && go build -o "$TMP/rama-installer" ./cmd/rama-installer/ )
 
