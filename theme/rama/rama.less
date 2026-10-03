@@ -32,7 +32,9 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 #links_on_top{display:none}
 #main_index{padding:0;margin:0}
 .home{
-  min-height:100vh;display:grid;place-items:center;padding:var(--sp-8) var(--sp-5);
+  /* explicit track: an auto track sizes to the hero's 640px max-content and
+     clips the lockup + search field on phones */
+  min-height:100vh;display:grid;place-items:center;grid-template-columns:minmax(0,1fr);padding:var(--sp-8) var(--sp-5);
   position:relative;overflow:hidden;
   background:
     radial-gradient(58% 36% at 50% -4%, rgba(239,35,60,.11), transparent 60%),
@@ -516,8 +518,11 @@ input.checkbox-onoff.reversed-checkbox[type="checkbox"]{
      placements would pin #sidebar into an implicit 0-width column (clipped
      infobox). `order` does nothing on grid items — re-place instead:
      single column, DOM order (infobox above results, as upstream mobile). */
+  /* must match the desktop selectors' specificity, or they win and the panel
+     lands in a 0-width second column again */
   #results{grid-template-columns:minmax(0,1fr)}
-  #results>#urls,#results>#sidebar{grid-column:1;grid-row:auto}
+  #results:not(.only_template_images)>#urls,
+  #results:not(.only_template_images)>#sidebar{grid-column:1;grid-row:auto}
   .appbar{flex-wrap:wrap}
   .appbar #search_view{order:3;flex-basis:100%;max-width:none}
   .appbar-actions{margin-left:auto}
