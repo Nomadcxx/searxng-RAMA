@@ -188,13 +188,16 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .appbar-tabs #categories,.search_filters{max-width:1180px;margin-inline:auto;width:100%}
 /* rail and panel both start at the top row — otherwise an empty answers/corrections
    slot takes row 1 and pushes the results column down. */
-#results>#urls{grid-column:1;grid-row:1}
-#results>#sidebar{grid-column:2;grid-row:1}
+#results:not(.only_template_images)>#urls{grid-column:1;grid-row:1}
+#results:not(.only_template_images)>#sidebar{grid-column:2;grid-row:1}
 
 #urls{display:flex;flex-direction:column;gap:var(--sp-2);min-width:0}
-/* Images tab: upstream turns #results into its own only_template_images grid and
-   wraps the gallery in #urls; our column-flex rail default would stack tiles
-   vertically full-width. Row direction restores the upstream masonry flow. */
+/* Images tab: upstream turns #results into its own single-column named-area grid
+   (sidebar row above urls) and wraps the gallery in #urls. The two-column
+   placements above are therefore scoped to non-image results — applied here they
+   pushed #sidebar into an implicit column squeezed to min-content (the response
+   time rendered one letter per line). Our column-flex rail default would also
+   stack tiles vertically full-width; row direction restores the masonry flow. */
 #results.only_template_images>#urls{flex-direction:row}
 /* Broken thumbnails: browsers paint the alt text at the img's own size and
    colour, so a failed tile became a full-width accent-pink text row. Cap the
