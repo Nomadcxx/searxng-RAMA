@@ -11,6 +11,9 @@
   --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
   --ease:cubic-bezier(.16,1,.3,1); --dur:.22s;
   --measure:64ch;
+  /* left edge of result TEXT: #results padding + result-card padding + its 1px
+     border. Tabs, filters and the image gallery start here too (one left edge). */
+  --rail-text:calc(var(--sp-5) + var(--sp-4) + 1px);
 }
 *{box-sizing:border-box}
 html{font-size:16px}
@@ -84,6 +87,9 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 #clear_search .hide_if_nojs{display:grid;place-items:center;line-height:0}
 #clear_search .show_if_nojs{display:none}
 #clear_search svg,#clear_search .ionicon{width:16px;height:16px}
+/* upstream drops the outline on the search-box buttons; design.md wants an
+   instant ring on every control */
+.search_box #clear_search:focus-visible,.search_box #send_search:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #send_search{
   width:44px;height:44px;min-width:44px;padding:0;border-radius:var(--r-pill);flex:0 0 auto;
   background:linear-gradient(160deg,var(--accent-fill),var(--accent-fill-2));color:#fff;
@@ -105,6 +111,16 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .category label,.category .tooltips{display:inline-flex;align-items:center;gap:.4rem;color:inherit;cursor:pointer;margin:0}
 .category .category_name{font-family:var(--font-mono);line-height:1}
 .category svg,.category .ionicon{width:14px;height:14px;stroke:currentColor;padding:0}
+/* upstream hides the category checkboxes with display:none, which also drops
+   them from the tab order — the home hint promises "Tab to browse categories"
+   and the chips were mouse-only. Visually hidden but focusable instead; Space
+   toggles, and the ring lands on the visible chip. */
+.search_categories .category_checkbox{position:relative}
+.search_categories .category_checkbox input[type="checkbox"]{display:block;position:absolute;inset:0;width:1px;height:1px;opacity:0;pointer-events:none}
+.search_categories .category_checkbox input:focus-visible+label{outline:2px solid var(--accent);outline-offset:2px}
+/* the chips live in #categories_container, not #categories — the gap on the
+   outer box never reached them, so the pills touched */
+.search_categories #categories_container{display:flex;flex-wrap:wrap;gap:var(--sp-2);justify-content:center}
 
 /* HOME — chips. The pill lives on the LABEL so the box always wraps its own
    content (putting it on the .category div clipped the text). */
@@ -118,7 +134,8 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 
 /* RESULTS APP BAR — a real tab strip, not chips: muted label, accent text +
    accent underline when selected (upstream's own pattern, restyled). */
-.appbar-tabs .category{margin-right:var(--sp-4)}
+/* spacing on the container, not per-tab margins (upstream zeroes those with
+   !important on mobile) */
 .appbar-tabs .category label{
   padding:.55rem .15rem;border-bottom:2px solid transparent;border-radius:0;background:none;
   color:var(--muted);font-family:var(--font-mono);font-size:.78rem;
@@ -134,7 +151,9 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .appbar-tabs .category_button svg{padding:0;width:14px;height:14px;stroke:currentColor}
 .appbar-tabs .category_button:hover{color:var(--ink)}
 .appbar-tabs .category_button.selected,.appbar-tabs .category_button:active{color:var(--accent);border-bottom-color:var(--accent)}
-.hint{margin-top:var(--sp-6);font-family:var(--font-mono);font-size:.72rem;color:var(--faint)}
+.hint{margin-top:var(--sp-6);font-family:var(--font-mono);font-size:.76rem;color:var(--faint)}
+/* keyboard shortcuts mean nothing on a touch screen */
+@media (hover:none){.hint{display:none}}
 /* always-reachable settings on the home view */
 .home-settings{
   position:fixed;right:1.25rem;bottom:1.25rem;z-index:30;width:46px;height:46px;border-radius:50%;
@@ -142,7 +161,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   box-shadow:0 6px 20px rgba(0,0,0,.35);transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease),transform var(--dur) var(--ease)}
 .home-settings:hover{color:var(--ink);border-color:var(--accent);transform:translateY(-2px)}
 .home-settings svg{width:22px;height:22px;stroke:currentColor}
-.hint kbd{background:var(--surface);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;padding:.05rem .4rem;color:var(--muted)}
+.hint kbd{background:var(--surface);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;padding:.05rem .4rem;color:var(--muted);font-size:inherit}
 
 /* ================= APP BAR (shared: results / preferences / stats) =========
    Markup comes from our forked simple/search.html — a flat bar, not upstream's
@@ -175,10 +194,23 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .appbar-actions svg,.appbar-actions .ionicon{width:19px;height:19px}
 
 /* tab strip + filters sit under the bar, aligned to the results rail */
-.appbar-tabs{border-bottom:1px solid var(--line);padding:0 var(--sp-5)}
-.appbar-tabs #categories{justify-content:flex-start;margin:0;padding:.35rem 0;border:0}
-.search_filters{display:flex;justify-content:flex-start;flex-wrap:wrap;gap:var(--sp-3);padding:.5rem var(--sp-5);width:100%;max-width:100%}
-.search_filters select{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);color:var(--muted);font-family:var(--font-mono);font-size:.78rem;padding:.25rem .5rem}
+.appbar-tabs{border-bottom:1px solid var(--line);padding:0}
+.appbar-tabs #categories{justify-content:flex-start;margin:0;padding:.35rem var(--rail-text);border:0}
+.appbar-tabs #categories_container{justify-content:flex-start;gap:0 var(--sp-4)}
+.search_filters{display:flex;justify-content:flex-start;flex-wrap:wrap;gap:var(--sp-3);padding:.5rem var(--rail-text);width:100%;max-width:100%}
+/* selects: upstream draws the arrow as a fixed-colour SVG (near-black on our dark
+   surfaces) inside a 2rem transparent right border. Hairline box + a CSS chevron
+   in --muted so it follows every palette. `html` prefix matches upstream's
+   `html.theme-dark select` weight. */
+html .search_filters select,html #main_preferences select:not([multiple]){
+  border:1px solid var(--line);border-radius:var(--r-md);padding:.3rem 2rem .3rem .65rem;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 15px) 55%,calc(100% - 10px) 55%;
+  background-size:5px 5px;background-repeat:no-repeat;background-origin:padding-box}
+/* a native select sizes to its LONGEST option (language names), not the chosen
+   one — cap it so "Auto-detect" isn't a 290px box */
+html .search_filters select{background-color:var(--surface);color:var(--muted);font-family:var(--font-mono);font-size:.78rem;width:auto;max-width:min(100%,15rem);text-overflow:ellipsis}
+html .search_filters select:hover{border-color:var(--line-2);color:var(--ink)}
 
 /* result rows — real classes: article.result .url_header .url_wrapper h3 .content .engines */
 /* results shell — centred Workbench rail + side panel, replacing upstream's
@@ -201,6 +233,18 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
    time rendered one letter per line). Our column-flex rail default would also
    stack tiles vertically full-width; row direction restores the masonry flow. */
 #results.only_template_images>#urls{flex-direction:row}
+/* upstream pins the images grid to its own fixed side margins (off-centre, 40px
+   left of the tabs). Same weight as its rule so the rail wins: centred, and the
+   first thumbnail starts on --rail-text (tiles carry .25rem margin + .5rem pad). */
+#main_results div#results.only_template_images{margin:var(--sp-4) auto 0;max-width:1180px}
+#results.only_template_images>#urls{padding-left:calc(var(--sp-4) + 1px - .75rem)}
+/* response time: a single meta line on the rail, not a hairline-boxed band */
+#results.only_template_images>#sidebar{padding-left:calc(var(--sp-4) + 1px)}
+#results.only_template_images .sidebar-collapsible{border-top:0;padding-bottom:0}
+#results.only_template_images #sidebar-end-collapsible{display:none}
+#results.only_template_images #sidebar summary{margin:0;padding-top:0;min-height:24px;display:flex;align-items:center}
+article.result-images span.title,article.result-images span.source{font-size:.78rem}
+article.result-images span.source{font-family:var(--font-mono);font-size:.72rem}
 /* Broken thumbnails: browsers paint the alt text at the img's own size and
    colour, so a failed tile became a full-width accent-pink text row. Cap the
    box to a tile and degrade to a neutral placeholder. */
@@ -222,6 +266,9 @@ article.result-images img.image_thumbnail{
   padding:var(--sp-4);border-radius:var(--r-md);border:1px solid transparent;
   transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),transform var(--dur) var(--ease);
 }
+/* upstream's tablet/phone layout adds a side margin to each result, pushing the
+   text 7px off the rail the tabs and filters share */
+#main_results #urls .result:not(.result-images){margin-inline:0}
 .result>*{grid-column:1;min-width:0}
 .result>.thumbnail_link{grid-column:2;grid-row:1/-1;align-self:start;float:none;margin:0}
 /* Match upstream's `.result a.thumbnail_link img.thumbnail` specificity so our
@@ -234,17 +281,23 @@ article.result-images img.image_thumbnail{
 .result:hover{background:var(--surface);border-color:var(--line);transform:translateY(-1px)}
 .url_header{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem}
 .favicon{width:18px;height:18px;border-radius:5px;background:var(--surface-2);display:grid;place-items:center;flex:0 0 auto;font-family:var(--font-mono);font-size:10px;color:var(--muted)}
-.url_wrapper{font-family:var(--font-mono);font-size:.78rem;color:var(--muted);display:flex;min-width:0}
-.url_wrapper .url_i1{color:var(--ink)}
+/* the URL is meta, not a second title: upstream's `.result .url_wrapper` (1rem,
+   ink) outweighed the bare `.url_wrapper` rule and the line competed with the
+   title. Host muted, path faint. */
+.result .url_header{color:var(--muted);font-size:.78rem}
+.result .url_wrapper{font-family:var(--font-mono);font-size:.78rem;color:var(--faint);display:flex;min-width:0}
+.result .url_wrapper .url_i1{color:var(--muted)}
 .url_wrapper span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .result h3{margin:0 0 .3rem;font-size:1.12rem;line-height:1.35;font-weight:600}
-.result h3 a{color:var(--ink);transition:color var(--dur) var(--ease);text-decoration-color:transparent;text-underline-offset:3px}
+/* upstream sets size (1.1em) and weight (normal) on the LINK, overriding the h3 */
+.result h3 a{font-size:inherit;font-weight:inherit;color:var(--ink);transition:color var(--dur) var(--ease);text-decoration-color:transparent;text-underline-offset:3px}
 .result:hover h3 a,.result h3 a:hover{color:var(--accent);text-decoration:underline;text-decoration-color:var(--accent)}
-.result .content{margin:0;color:var(--muted);font-size:.92rem;max-width:var(--measure)}
+/* upstream line-height 1.24 is cramped for body text; 58ch keeps lines ~70 chars */
+.result .content{margin:0;color:var(--muted);font-size:.92rem;line-height:1.55;max-width:58ch}
 /* meta line sits with its result, left-aligned (upstream floats it right) */
 .result .engines{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem;align-items:center;float:none;justify-content:flex-start}
-.result .engines span{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.02em;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);padding:.1rem .45rem;border-radius:var(--r-sm)}
-.result .cache_link{color:var(--faint);font-family:var(--font-mono);font-size:.68rem;margin-left:.2rem}
+.result .engines span{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.02em;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);padding:.1rem .45rem;border-radius:var(--r-sm)}
+.result .cache_link{color:var(--faint);font-family:var(--font-mono);font-size:.72rem!important;margin-left:.2rem}
 .result .cache_link:hover{color:var(--accent)}
 
 /* side panel — REAL markup: #sidebar > #result_count, #infoboxes
@@ -261,17 +314,34 @@ article.result-images img.image_thumbnail{
   font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
   color:var(--faint);cursor:pointer;list-style:none;margin:0 0 .5rem}
 #sidebar summary::-webkit-details-marker{display:none}
-#sidebar .infobox img{max-width:100%;height:auto;border-radius:var(--r-sm)}
+/* reserve the image box before it loads: on mobile the infobox sits ABOVE the
+   results, so an unsized image pushed every result down when it arrived.
+   scale-down letterboxes logos without upscaling them. */
+#sidebar .infobox img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:scale-down;background:var(--surface-2);border-radius:var(--r-sm)}
+/* attribute rows: mono meta label over the value, not bold label-colon-value */
+/* upstream lays each dl out inline — stack instead, or the small mono label and
+   the larger value fight over one baseline */
+#sidebar .infobox .attributes dl{display:block;margin:0 0 var(--sp-3)}
+#sidebar .infobox .attributes dt{display:block;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:400;color:var(--faint)}
+#sidebar .infobox .attributes dd{margin:0;color:var(--ink);font-size:.88rem;line-height:1.45}
 #sidebar .infobox h1,#sidebar .infobox h2,#sidebar .infobox h3,#sidebar .infobox h4{
   margin:.2rem 0 .5rem;font-size:1.05rem;color:var(--ink);font-weight:600}
 #sidebar p{margin:0 0 .6rem;color:var(--muted);font-size:.88rem}
 #sidebar a{color:var(--accent)}
-/* infobox source links: real markup is .infobox .urls > ul > li.url — kill the
-   default disc so the link reads as a row, not a stray bullet */
-#sidebar .infobox .urls ul{list-style:none;margin:.6rem 0 0;padding:0}
-#sidebar .infobox .urls a{font-family:var(--font-mono);font-size:.8rem}
+/* infobox source links: real markup is .infobox .urls > ul > li.url > bdi > a.
+   A wrap of link chips (engine-badge voice) instead of a plain-text list that
+   didn't read as links; 28px chips also clear the 24px target minimum. */
+#sidebar .infobox .urls ul{list-style:none;margin:var(--sp-3) 0 0;padding:0;display:flex;flex-wrap:wrap;gap:.4rem}
+#sidebar .infobox .urls a{
+  display:inline-flex;align-items:center;min-height:28px;padding:0 .6rem;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);
+  color:var(--muted);font-family:var(--font-mono);font-size:.74rem;text-decoration:none;
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+#sidebar .infobox .urls a:hover{color:var(--ink);border-color:var(--line-2)}
 #sidebar table{width:100%;border-collapse:collapse;font-size:.85rem}
 #sidebar td,#sidebar th{padding:.35rem 0;border-top:1px solid var(--line);text-align:left;color:var(--muted);font-weight:400}
+/* engine names in the response-time table link to their error log */
+#sidebar .engine-name a{display:inline-flex;align-items:center;min-height:24px}
 
 /* pagination — real id: #pagination .page_number */
 #pagination{display:flex;justify-content:center;gap:.35rem;margin-top:var(--sp-8);flex-wrap:wrap}
@@ -298,8 +368,11 @@ article.result-images img.image_thumbnail{
    the page renders blank. Search results must paint immediately; the hover-lift
    is the only motion this list needs. */
 
-footer{border-top:1px solid var(--line);padding:var(--sp-5);text-align:center;color:var(--faint);font-family:var(--font-mono);font-size:.72rem}
-footer a{color:var(--muted)}
+/* upstream shrinks footer p to .9em (10.4px) — under design.md's .72rem meta
+   floor. Links get vertical padding to clear the 24px target minimum. */
+footer{border-top:1px solid var(--line);padding:var(--sp-5);text-align:center;color:var(--faint);font-family:var(--font-mono);font-size:.76rem}
+footer p{font-size:inherit;margin:0;line-height:1.8}
+footer a{color:var(--muted);display:inline-block;padding:.3rem .1rem}
 footer a:hover{color:var(--accent)}
 
 /* Upstream still ships #search_header rules for its grid; our fork no longer
@@ -405,6 +478,7 @@ html body #main_preferences .tabs>input:checked+label{
    column too, since it has no description of its own */
 #main_preferences fieldset .search_categories{
   grid-column:2/-1;justify-content:flex-start;margin:0;gap:var(--sp-2)}
+#main_preferences .search_categories #categories_container{justify-content:flex-start}
 
 /* tables (cookies, engines) */
 #main_preferences table{width:100%;border-collapse:collapse;font-size:.86rem}
@@ -455,6 +529,12 @@ input.checkbox-onoff.reversed-checkbox[type="checkbox"]:checked{
 input.checkbox-onoff[type="checkbox"]:checked,
 input.checkbox-onoff.reversed-checkbox[type="checkbox"]{
   background:color-mix(in srgb,var(--accent-fill) 28%,var(--surface));border:1px solid var(--accent-fill)}
+/* upstream sets no focus style on the switch — it was invisible to keyboard users */
+input.checkbox-onoff[type="checkbox"]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+/* and upstream's `#main_preferences .value input:focus, … select:focus
+   {outline:none}` outweighs both rings above for every preferences control —
+   same weight, later, so keyboard focus shows again */
+#main_preferences .value input:focus-visible,#main_preferences .value select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 #main_preferences #toggle-all-engines-container{display:flex;gap:var(--sp-2);margin-bottom:var(--sp-4)}
 #main_preferences .bang{
   background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);
@@ -495,6 +575,8 @@ input.checkbox-onoff.reversed-checkbox[type="checkbox"]{
    outside the rail. Left as-is rather than forking that whole table template —
    an instance with data renders the <table>, which does ride the rail. */
 #main_stats h2,#main_info h2{font-size:1.15rem;margin:var(--sp-6) 0 var(--sp-3)}
+/* sort headers + engine names are table links: give them a 24px target */
+#main_stats table a{display:inline-flex;align-items:center;min-height:24px}
 #main_info{padding-bottom:var(--sp-8)}
 #main_info p,#main_info li{color:var(--muted);max-width:var(--measure)}
 #main_info a{color:var(--accent)}
@@ -526,12 +608,35 @@ input.checkbox-onoff.reversed-checkbox[type="checkbox"]{
   .appbar{flex-wrap:wrap}
   .appbar #search_view{order:3;flex-basis:100%;max-width:none}
   .appbar-actions{margin-left:auto}
-  .appbar-tabs,.search_filters{padding-left:var(--sp-4);padding-right:var(--sp-4)}
+  /* ten category tabs wrapped to three rows (~150px before any result). Text-only
+     and tighter: two rows. Still wraps — never a clipped single row (every
+     category stays visible and reachable). */
+  /* filters: a select is as wide as its longest option, so the language box
+     always hits its cap and the others wrap one per row. Language takes the
+     first row; time range sizes to content and SafeSearch takes the rest. */
+  .search_filters{display:grid;grid-template-columns:auto minmax(0,1fr)}
+  .search_filters select.language{grid-column:1/-1}
+  html .search_filters select{max-width:none;width:100%}
+  .appbar-tabs #categories_container{gap:0 var(--sp-3)}
+  .appbar-tabs .category_button svg,.appbar-tabs .category label svg,
+  .appbar-tabs .category .ionicon{display:none}
+  /* upstream forces `padding:1rem !important` on phone tabs */
+  .appbar-tabs #categories .category_button,
+  .appbar-tabs #categories .category_checkbox label{padding:.45rem .15rem!important}
   /* app pages: the label|control|help row stacks rather than crushing */
   #main_preferences fieldset{grid-template-columns:minmax(0,1fr);row-gap:var(--sp-2);align-items:start}
   #main_preferences legend,#main_preferences .value,#main_preferences .description,
   #main_preferences fieldset .search_categories{grid-column:1}
   .page_with_header>*:not(.appbar){padding-inline:var(--sp-4)}
+}
+/* iOS Safari zooms the whole page when a field under 16px takes focus */
+@media (pointer:coarse){
+  .appbar #q,html .search_filters select{font-size:1rem}
+  /* 16px mono pushed the three filters onto three rows; Inter (design.md's
+     controls face) keeps them to two */
+  html .search_filters select{font-family:var(--font-ui)}
+  .search_filters{gap:var(--sp-2)}
+  #main_preferences .value select,#main_preferences .value input[type="text"]{font-size:1rem!important}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}

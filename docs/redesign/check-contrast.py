@@ -44,6 +44,11 @@ def palette_checks(name, p):
         (f"{name}: muted / surface",       p["muted"], s,  4.5),
         (f"{name}: muted / ground",        p["muted"], g,  4.5),
         (f"{name}: engine badge / surf-2", p["muted"], s2, 4.5),
+        # infobox source-link chips: muted at rest (badge pair above), ink on hover
+        (f"{name}: link chip hover / surf-2", p["ink"], s2, 4.5),
+        # focus ring is non-text UI: WCAG 1.4.11 needs 3:1 against what it sits on
+        (f"{name}: focus ring / ground",   p["accent"], g, 3.0),
+        (f"{name}: focus ring / surf-2",   p["accent"], s2, 3.0),
         (f"{name}: faint / ground",        p["faint"], g,  4.5),
         (f"{name}: faint / surface",       p["faint"], s,  4.5),
         (f"{name}: CTA white / fill",      WHITE, p["fill"],  4.5),
