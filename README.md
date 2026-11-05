@@ -1,8 +1,8 @@
-![SearXNG RAMA Edition](brand/searxng.png)
+![SearXNG RAMA Edition](brand/searxng.webp)
 
 SearXNG fork with a redesigned UI and privacy-first defaults.
 
-<img src="brand/screenshot.png" alt="SearXNG RAMA home" style="width: 100%; border-radius: 8px;"/>
+<img src="brand/screenshot.png" alt="SearXNG RAMA home" loading="lazy" style="width: 100%; border-radius: 8px;"/>
 
 ## Installation
 
@@ -60,8 +60,8 @@ Three variants, built once at install time: **rama** (dark, default),
 restarts the service. Nothing recompiles.
 
 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 20px 0;">
-  <img src="brand/screenshot_search.png" alt="SearXNG RAMA results" style="width: 100%; border-radius: 8px;"/>
-  <img src="brand/screenshot_preferences.png" alt="SearXNG RAMA preferences" style="width: 100%; border-radius: 8px;"/>
+  <img src="brand/screenshot_search.png" alt="SearXNG RAMA results" loading="lazy" style="width: 100%; border-radius: 8px;"/>
+  <img src="brand/screenshot_preferences.png" alt="SearXNG RAMA preferences" loading="lazy" style="width: 100%; border-radius: 8px;"/>
 </div>
 
 ## Details
